@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.1.1-nightly.11]
+
+### New Features
+
+- [`ded0848`](https://github.com/swpu-acm/algohub.git/commit/ded0848add538f4a8a2b79fc76ded269121dcf48) ([#41](https://github.com/swpu-acm/algohub.git/pull/41) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Support create new algorithm problem and upload test cases.
+
 ## \[0.1.1-nightly.10]
 
 ### New Features
