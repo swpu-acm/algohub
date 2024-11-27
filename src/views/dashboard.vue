@@ -21,10 +21,7 @@ const themeStore = useThemeStore();
 const loadingProfile = ref(true);
 onMounted(async () => {
     if (!accountStore.isLoggedIn) return;
-    const response = await api.fetchProfile({
-        id: accountStore.account?.id!,
-        token: accountStore.account?.token!,
-    });
+    const response = await api.fetchProfile(accountStore.account.id!);
     if (!response.success) {
         return toast.add({ severity: 'error', summary: 'Error', detail: response.message });
     }
@@ -34,7 +31,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="min-h-screen h-screen flex flex-col">
+    <div class="flex-1 min-h-screen h-screen flex flex-col">
         <UniversalToolBar :path></UniversalToolBar>
         <div class="flex flex-col md:flex-row h-full w-full">
             <aside class="w-full md:w-1/3 lg:w-1/4 flex">

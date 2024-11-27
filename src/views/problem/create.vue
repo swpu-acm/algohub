@@ -221,7 +221,7 @@ const formatSize = (bytes: number) => {
 </script>
 
 <template>
-    <div class="min-h-screen h-full flex flex-col">
+    <div class="flex-1 flex flex-col">
         <UniversalToolBar :path></UniversalToolBar>
         <div class="max-w-full md:max-w-[768px] mx-auto">
             <Panel class="mt-10">

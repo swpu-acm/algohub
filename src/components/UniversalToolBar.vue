@@ -5,7 +5,14 @@ import { useToast } from 'primevue';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-const props = defineProps<{ path?: { icon: string, label: string, command: () => void }[] }>()
+const props = defineProps<{
+    path?: {
+        icon: string,
+        label: string,
+        link: string,
+        command: () => void
+    }[]
+}>()
 
 const router = useRouter();
 const toast = useToast();
@@ -87,7 +94,7 @@ const toggleCreateMenu = (event: any) => {
             <img :src="themeStore.dark ? '/acm-light.png' : '/acm.png'" width="40"></img>
             <Breadcrumb :model="props.path">
                 <template #item="{ item }">
-                    <a :class="item.url ? 'cursor-pointer' : ''" :href="item.url">
+                    <a :class="item.link ? 'cursor-pointer' : ''" :href="item.link">
                         <span :class="item.icon"></span>
                         <span>{{ item.label }}</span>
                     </a>

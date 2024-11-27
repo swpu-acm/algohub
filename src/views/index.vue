@@ -5,7 +5,8 @@ const router = useRouter();
 </script>
 
 <template>
-  <div class="fixed bottom-0 sm:bottom-unset w-full py-2 bg-indigo-600 text-white sm:flex sm:items-center sm:justify-between sm:px-6 lg:px-8">
+  <div
+    class="fixed bottom-0 sm:bottom-unset w-full py-2 bg-indigo-600 text-white sm:flex sm:items-center sm:justify-between sm:px-6 lg:px-8">
     <p class="text-center font-medium sm:text-left">
       AlgoHub is on nightly build now! Want to try it out?
       <br class="sm:hidden" />
@@ -17,7 +18,7 @@ const router = useRouter();
       Releases
     </a>
   </div>
-  <section class="bg-gray-900 text-white h-screen">
+  <section class="bg-gray-900 text-white h-screen w-full">
     <div class="mx-auto max-w-screen-xl px-4 py-32 lg:flex lg:h-screen lg:items-center">
       <div class="mx-auto max-w-3xl text-center">
         <h1
@@ -32,12 +33,12 @@ const router = useRouter();
         </p>
 
         <div class="mt-8 flex flex-wrap justify-center gap-4">
-          <a class="block w-full rounded border border-blue-600 bg-blue-600 px-12 py-3 text-sm font-medium text-white hover:bg-transparent hover:text-white focus:outline-none focus:ring active:text-opacity-75 sm:w-auto"
+          <a class="block w-full rounded border border-blue-600 bg-blue-600 px-12 py-3 text-sm font-medium text-white hover:bg-transparent hover:text-white focus:outline-none focus:ring active:text-opacity-75 sm:w-auto cursor-pointer"
             @click="router.push('/signup')">
             Signup
           </a>
 
-          <a class="block w-full rounded border border-blue-600 px-12 py-3 text-sm font-medium text-white hover:bg-blue-600 focus:outline-none focus:ring active:bg-blue-500 sm:w-auto"
+          <a class="block w-full rounded border border-blue-600 px-12 py-3 text-sm font-medium text-white hover:bg-blue-600 focus:outline-none focus:ring active:bg-blue-500 sm:w-auto cursor-pointer"
             @click="router.push('/login')">
             Login
           </a>

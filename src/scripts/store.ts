@@ -57,7 +57,7 @@ interface Account {
 
   nickname?: string;
   sex?: boolean;
-  birthday?: Date;
+  birthday?: string;
 
   name?: string;
   student_id?: string;

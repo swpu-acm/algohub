@@ -1,7 +1,7 @@
 import { AxiosError } from "axios";
 import axios from "@/scripts/axios";
 import { handleAxiosError } from "@/scripts/utils";
-import type { ProblemDetail } from "./types";
+import type { ProblemDetail, Profile } from "./types";
 
 export interface Response<D> {
   success: boolean;
@@ -59,20 +59,6 @@ export const uploadContent = async (form: Upload) => {
   }
 };
 
-interface Profile {
-  avatar?: string;
-  signature?: string;
-  links?: string[];
-  nickname?: string;
-  sex?: boolean;
-  // birthday?: string;
-  name?: string;
-  student_id?: string;
-  school?: string;
-  college?: string;
-  major?: string;
-}
-
 interface ProfileForm {
   id: string;
   token: string;
@@ -102,11 +88,9 @@ export const login = async (form: LoginForm) => {
   }
 };
 
-export const fetchProfile = async (form: AuthResponse) => {
+export const fetchProfile = async (id: string) => {
   try {
-    const response = await axios.post(`/account/profile/${form.id}`, {
-      token: form.token,
-    });
+    const response = await axios.get(`/account/profile/${id}`);
     return response.data as Response<Profile>;
   } catch (error) {
     return handleAxiosError(AxiosError.from(error));

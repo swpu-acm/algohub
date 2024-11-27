@@ -51,7 +51,7 @@ const onSubmitCode = async (code: string, language: string) => {
     toast.add({ severity: 'success', summary: 'Success', detail: 'Your code has been submitted successfully.' });
 }
 
-const path = ref([
+const path = ref<{ label?: string, link?: string }[]>([
     { label: 'fu050409' },
     { label: 'problem' },
     { label: id },
@@ -67,12 +67,15 @@ onMounted(async () => {
         return toast.add({ severity: 'error', summary: 'Error', detail: res.message });
     }
     problem.value = res.data;
+    path.value = [
+        { label: problem.value?.owner.id }
+    ]
     loading.value = false;
 })
 </script>
 
 <template>
-    <div class="h-full w-full flex flex-col">
+    <div class="flex-1 w-full flex flex-col">
         <UniversalToolBar :path></UniversalToolBar>
         <Splitter :gutterSize="2" class="flex-1 max-h-screen">
             <SplitterPanel>

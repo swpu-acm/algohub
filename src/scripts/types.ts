@@ -13,6 +13,22 @@ export enum Mode {
   OI = "OI",
 }
 
+export interface Profile {
+  username: string;
+  email: string;
+  avatar?: string;
+  signature?: string;
+  links?: string[];
+  nickname?: string;
+  sex?: boolean;
+  birthday?: string;
+  name?: string;
+  student_id?: string;
+  school?: string;
+  college?: string;
+  major?: string;
+}
+
 export interface ProblemDetail {
   id: Thing;
   title: string;
@@ -33,4 +49,3 @@ export interface ProblemDetail {
   created_at: Date;
   updated_at: Date;
 }
-
