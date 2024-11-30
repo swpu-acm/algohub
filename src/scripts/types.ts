@@ -35,6 +35,16 @@ export interface Profile {
   rating: number;
 }
 
+export interface CreateAsset {
+  auth: Credentials;
+  owner: string;
+  file: File;
+}
+
+export interface UserContent {
+  id: string;
+}
+
 export interface ProblemDetail {
   id: RecordId;
   title: string;
@@ -54,4 +64,11 @@ export interface ProblemDetail {
   private: boolean;
   created_at: Date;
   updated_at: Date;
+}
+
+export enum Language {
+  Rust = "Rust",
+  Python = "Python",
+  C = "C",
+  Cpp = "Cpp",
 }

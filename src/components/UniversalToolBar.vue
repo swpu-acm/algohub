@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useAccountStore, useThemeStore } from '@/scripts/store';
-import { useToast } from 'primevue';
+import { Avatar, Skeleton, useToast } from 'primevue';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -125,11 +125,11 @@ const toString = (value: any) => {
     <div class="bg-gray-100 dark:bg-zinc-900 flex flex-row items-center justify-between w-full py-3 px-5 flex-wrap"
         :class="{ 'border-b-[1.2px] border-zinc-300 dark:border-zinc-600 shadow-sm': separateBottom ?? true }">
         <div class="inline-flex justify-center items-center">
-            <img :src="themeStore.dark ? '/acm-light.png' : '/acm.png'" width="40"></img>
+            <img @click="router.push('/')" class="cursor-pointer" :src="themeStore.dark ? '/acm-light.png' : '/acm.png'" width="40"></img>
             <Breadcrumb v-if="path?.length" :model="path" class="!bg-transparent !p-0">
                 <template #item="{ item }">
-                    <Button v-if="item.link" v-ripple @click="router.push(item.link)" :icon="item.icon" :label="toString(item.label)" size="small" plain
-                        text></Button>
+                    <Button v-if="item.link" v-ripple @click="router.push(item.link)" :icon="item.icon"
+                        :label="toString(item.label)" size="small" plain text></Button>
                     <a v-else :href="item.link" class="px-2">
                         <span v-if="item.icon" class="item.icon"></span>
                         <span class="text-sm">{{ item.label }}</span>
@@ -140,12 +140,13 @@ const toString = (value: any) => {
             <Skeleton v-else class="ml-2 my-1" width="100px" height="20px"></Skeleton>
         </div>
         <div class="inline-flex justify-center items-center gap-3">
-            <Button v-ripple @click="toggleCreateMenu" aria-haspopup="true" aria-controls="overlay_menu" plain outlined>
+            <Button v-if="accountStore.isLoggedIn" v-ripple @click="toggleCreateMenu" aria-haspopup="true"
+                aria-controls="overlay_menu" plain outlined>
                 <span class="pi pi-plus" data-pc-section="icon"></span>
                 <span class="w-0" data-pc-section="label">&nbsp;</span>
                 <i class="pi pi-angle-down"></i>
             </Button>
-            <Menu ref="menu" id="overlay_menu" :model="createMenuItems" :popup="true">
+            <Menu v-if="accountStore.isLoggedIn" ref="menu" id="overlay_menu" :model="createMenuItems" :popup="true">
                 <template #submenuitem="{ item }">
                     <span class="font-bold">{{ item.label }}</span>
                 </template>
@@ -156,16 +157,19 @@ const toString = (value: any) => {
                     </a>
                 </template>
             </Menu>
-            <Button v-ripple @click="router.push(`/account/${accountStore.account?.username}?tab=problems`)"
-                icon="pi pi-book" plain outlined></Button>
+            <Button v-if="accountStore.isLoggedIn" v-ripple
+                @click="router.push(`/account/${accountStore.account?.username}?tab=problems`)" icon="pi pi-book" plain
+                outlined></Button>
             <Button v-ripple @click="themeStore.toggle" :icon="`pi pi-${themeStore.dark ? 'moon' : 'sun'}`" plain
                 outlined></Button>
-            <Divider layout="vertical" class="!mx-1"></Divider>
-            <Avatar v-if="accountStore.avatarUrl" @click="isShowUserPanel = !isShowUserPanel"
+            <Divider v-if="accountStore.isLoggedIn" layout="vertical" class="!mx-1"></Divider>
+            <Avatar v-if="accountStore.isLoggedIn && accountStore.avatarUrl" @click="isShowUserPanel = !isShowUserPanel"
                 :image="accountStore.avatarUrl" class="!cursor-pointer" shape="circle">
             </Avatar>
-            <Avatar v-else-if="accountStore.isLoggedIn" @click="isShowUserPanel = !isShowUserPanel"
-                class="!cursor-pointer" shape="circle" :label="accountStore.account.username![0]"></Avatar>
+            <Avatar v-else-if="accountStore.isLoggedIn && accountStore.account?.username"
+                @click="isShowUserPanel = !isShowUserPanel" class="!cursor-pointer" shape="circle"
+                :label="accountStore.account.username[0]"></Avatar>
+            <Skeleton v-else shape="circle" size="2em"></Skeleton>
         </div>
     </div>
 </template>

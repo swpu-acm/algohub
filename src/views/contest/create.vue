@@ -141,45 +141,6 @@ const onSelectedFiles = (event: FileUploadSelectEvent) => {
     });
 };
 
-const uploadTestCases = async (callback: () => void) => {
-    normalizedFiles.value.forEach(async (fileTuple) => {
-        if (!fileTuple.input) {
-            return toast.add({ severity: 'error', summary: 'Error', detail: 'Input file not found for ' + fileTuple.output?.name, life: 3000 });
-        } else if (!fileTuple.output) {
-            return toast.add({ severity: 'error', summary: 'Error', detail: 'Output file not found for ' + fileTuple.input?.name, life: 3000 });
-        }
-
-        const res = await api.uploadContent({
-            id: accountStore.account.id!,
-            token: accountStore.account.token!,
-            file: fileTuple.input,
-        })
-        if (!res.success) {
-            return toast.add({ severity: 'error', summary: 'Error', detail: res.message, life: 3000 });
-        } else {
-            totalUploadedSize.value += parseInt(formatSize(fileTuple.input.size));
-        }
-
-        const outputRes = await api.uploadContent({
-            id: accountStore.account.id!,
-            token: accountStore.account.token!,
-            file: fileTuple.output,
-        })
-        if (!outputRes.success) {
-            return toast.add({ severity: 'error', summary: 'Error', detail: outputRes.message, life: 3000 });
-        } else {
-            totalUploadedSize.value += parseInt(formatSize(fileTuple.output.size));
-        }
-
-        testCases.push({
-            input: res.data!.path,
-            output: outputRes.data!.path,
-        })
-        normalizedFiles.value.splice(normalizedFiles.value.indexOf(fileTuple), 1);
-    });
-    callback();
-}
-
 const normalizeFiles = (files: File[]) => {
     const normalizedFiles: { input?: File, output?: File }[] = [];
 

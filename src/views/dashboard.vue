@@ -27,6 +27,7 @@ onMounted(async () => {
     if (!accountStore.isLoggedIn) return;
     const profile = await api.fetchProfile(accountStore.account.id!);
     if (!profile.success) {
+        accountStore.logout();
         return toast.add({ severity: 'error', summary: 'Error', detail: profile.message, life: 3000 });
     }
     accountStore.mergeProfile(profile.data!);

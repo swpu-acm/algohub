@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router';
 import * as api from '@/scripts/api';
 import { useAccountStore, useThemeStore } from '@/scripts/store';
 import { useToast } from 'primevue';
-import type { ProblemDetail } from '@/scripts/types';
+import { Language, ProblemDetail } from '@/scripts/types';
 import { MdPreview } from 'md-editor-v3';
 import 'md-editor-v3/lib/style.css';
 
@@ -37,18 +37,23 @@ const formatProblem = (problem: ProblemDetail) => {
 }
 
 const code = ref('');
-const language = ref('rust');
-const onSubmitCode = async (code: string, language: string) => {
+const language = ref(Language.Rust);
+const onSubmit = async (code: string, lang: Language, finish: (text: string, severity: string) => void) => {
+    if (!code) {
+        return finish('Code submission should not be a blank.', 'error')
+    }
+    if (!problem.value) {
+        return finish('Failed to access problem data.', 'error')
+    }
     const res = await api.submitCode(id, {
-        id: accountStore.account.id!,
-        token: accountStore.account.token!,
-        language,
+        auth: accountStore.auth!,
+        lang,
         code,
     });
     if (!res.success) {
-        return toast.add({ severity: 'error', summary: 'Error', detail: res.message });
+        return finish(res.message, 'error');
     }
-    toast.add({ severity: 'success', summary: 'Success', detail: 'Your code has been submitted successfully.' });
+    finish('Code submitted', 'success');
 }
 
 const path = ref<{ label?: string, link?: string }[]>([]);
@@ -89,7 +94,7 @@ onMounted(async () => {
                 </Panel>
             </SplitterPanel>
             <SplitterPanel>
-                <MonacoEditor :code="code" :language="language" :onSubmitCode="onSubmitCode">
+                <MonacoEditor :code="code" :language="language" :onSubmit>
                 </MonacoEditor>
             </SplitterPanel>
         </Splitter>

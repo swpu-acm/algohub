@@ -145,8 +145,8 @@ const uploadTestCases = async (callback: () => void) => {
         }
 
         const res = await api.uploadContent({
-            id: accountStore.account.id!,
-            token: accountStore.account.token!,
+            auth: accountStore.auth!,
+            owner: `account:${accountStore.account.id}`,
             file: fileTuple.input,
         })
         if (!res.success) {
@@ -156,8 +156,8 @@ const uploadTestCases = async (callback: () => void) => {
         }
 
         const outputRes = await api.uploadContent({
-            id: accountStore.account.id!,
-            token: accountStore.account.token!,
+            auth: accountStore.auth!,
+            owner: `account:${accountStore.account.id}`,
             file: fileTuple.output,
         })
         if (!outputRes.success) {
@@ -167,8 +167,8 @@ const uploadTestCases = async (callback: () => void) => {
         }
 
         testCases.push({
-            input: res.data!.path,
-            output: outputRes.data!.path,
+            input: res.data!.id,
+            output: outputRes.data!.id,
         })
         normalizedFiles.value.splice(normalizedFiles.value.indexOf(fileTuple), 1);
     });

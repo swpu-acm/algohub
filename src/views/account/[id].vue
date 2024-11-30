@@ -3,8 +3,8 @@ import * as api from "@/scripts/api";
 import { useAccountStore, useThemeStore } from "@/scripts/store";
 import { timeAgo } from "@/scripts/time";
 import { ProblemDetail, type Profile } from "@/scripts/types";
-import { expandUrl } from "@/scripts/utils";
-import { useToast } from "primevue";
+import { expandAssetUrl } from "@/scripts/utils";
+import { Avatar, useToast } from "primevue";
 import { onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
@@ -96,8 +96,12 @@ onMounted(async () => {
                     <div class="w-full max-w-[1200px] flex flex-col md:flex-row my-[2em] gap-6 mx-8">
                         <div v-if="!loading && profile" class="flex flex-col h-full">
                             <div class="flex gap-4 sm:flex-col sm:gap-1">
-                                <img class="w-[8em] h-[8em] sm:w-[18em] sm:h-[18em] rounded-full border-[2px] border-zinc-300 dark:border-zinc-700"
-                                    :src="expandUrl(profile!.avatar)"></img>
+                                <img v-if="profile?.avatar"
+                                    class="w-[8em] h-[8em] sm:w-[18em] sm:h-[18em] rounded-full border-[2px] border-zinc-300 dark:border-zinc-700"
+                                    :src="expandAssetUrl(profile.avatar)"></img>
+                                <Avatar pt:label:class="text-4xl sm:text-9xl" :label="(profile?.nickname ?? '?')[0]" v-else
+                                    class="!w-[8em] !h-[8em] sm:!w-[18em] sm:!h-[18em] !rounded-full border-[2px] border-zinc-300 dark:border-zinc-700">
+                                </Avatar>
                                 <div class="flex flex-col items-start justify-center">
                                     <h3 class="text-2xl font-bold">{{ profile.nickname }}</h3>
                                     <span class="text-lg text-gray-500">{{ profile.username }} · {{ profile.sex ?
@@ -105,22 +109,22 @@ onMounted(async () => {
                                 </div>
                             </div>
                             <span class="my-1">{{ profile.signature }}</span>
-                            <Button class="my-4" size="small" v-if="accountStore.account.username === profile.username"
+                            <Button class="my-4" size="small" v-if="accountStore.account?.username === profile.username"
                                 label="Edit Profile" severity="secondary" disabled fluid></Button>
                             <div class="flex flex-col gap-2 my-2">
                                 <div class="inline-flex items-center gap-2">
                                     <i class="pi pi-envelope text-gray-500"></i>
                                     <span>{{ profile.email }}</span>
                                 </div>
-                                <div class="inline-flex items-center gap-2">
+                                <div v-if="profile.school" class="inline-flex items-center gap-2">
                                     <i class="pi pi-building text-gray-500"></i>
                                     <span>{{ profile.school }}</span>
                                 </div>
-                                <div class="inline-flex items-center gap-2">
+                                <div v-if="profile.college" class="inline-flex items-center gap-2">
                                     <i class="pi pi-building-columns text-gray-500"></i>
                                     <span>{{ profile.college }}</span>
                                 </div>
-                                <div class="inline-flex items-center gap-2">
+                                <div v-if="profile.major" class="inline-flex items-center gap-2">
                                     <i class="pi pi-graduation-cap text-gray-500"></i>
                                     <span>{{ profile.major }}</span>
                                 </div>
