@@ -17,7 +17,7 @@ const themeStore = useThemeStore();
 
 const id = route.params.id as string;
 const tab = ref<string>('overview');
-const path = ref<{ label: string; to: string; }[]>([]);
+const path = ref<{ label: string; link: string; }[]>([]);
 
 const profile = ref<Profile>();
 
@@ -26,22 +26,23 @@ const items = ref([
     { tab: 'problems', label: 'Problems', icon: 'pi pi-book' },
 ]);
 
-const toggleTab = (to: string) => {
+const toggleTab = async (to: string) => {
     router.push(`/account/${id}?tab=${to}`);
     tab.value = to;
     switch (to) {
         case 'overview':
             break;
         case 'problems':
-            onProblemTab();
+            await onProblemTab();
             break;
     }
 }
 
 const problemList = ref<ProblemDetail[]>([]);
+problemList.value.length = 1;
+
 const loadingProblems = ref(true);
 const onProblemTab = async () => {
-    console.log("loading problems")
     loadingProblems.value = true;
     const res = await api.listProblems({
         identity: profile.value!.username,
@@ -52,16 +53,13 @@ const onProblemTab = async () => {
     }
     problemList.value = res.data!;
     loadingProblems.value = false;
-    console.log("loaded problems")
-    console.log(problemList.value)
-    console.log(loadingProblems.value)
 }
 
-watch(() => route.query.tab, (newTab) => {
+watch(() => route.query.tab, async (newTab) => {
     if (newTab !== undefined) {
-        toggleTab(newTab as string);
+        await toggleTab(newTab as string);
     } else {
-        toggleTab('overview');
+        await toggleTab('overview');
     }
 })
 
@@ -71,22 +69,23 @@ onMounted(async () => {
     if (!res.success) {
         return toast.add({ severity: "error", summary: "Error", detail: res.message });
     }
-    console.log(res.data)
     profile.value = res.data;
     path.value = [
-        { label: profile.value!.username, to: "/" }
+        { label: profile.value!.username, link: `/account/${id}` }
     ]
     loading.value = false;
+    await toggleTab(route.query.tab as string || 'overview');
 })
 </script>
 
 <template>
     <div class="w-full h-full flex flex-col">
-        <UniversalToolBar :path></UniversalToolBar>
+        <UniversalToolBar :path :separateBottom="false"></UniversalToolBar>
         <div class="w-full flex-1">
             <Tabs :value="tab || 'overview'">
-                <TabList pt:tabList:class="!bg-gray-100 dark:!bg-zinc-900">
-                    <Tab v-for="tab in items" :key="tab.label" :value="tab.tab" @click="toggleTab(tab.tab)">
+                <TabList pt:tabList:class="!bg-gray-100 dark:!bg-zinc-900 px-5">
+                    <Tab class="!py-2" v-for="tab in items" :key="tab.label" :value="tab.tab"
+                        @click="toggleTab(tab.tab)">
                         <a v-ripple class="flex items-center gap-2 text-inherit">
                             <i :class="tab.icon"></i>
                             <span>{{ tab.label }}</span>
@@ -97,7 +96,7 @@ onMounted(async () => {
                     <div class="w-full max-w-[1200px] flex flex-col md:flex-row my-[2em] gap-6 mx-8">
                         <div v-if="!loading && profile" class="flex flex-col h-full">
                             <div class="flex gap-4 sm:flex-col sm:gap-1">
-                                <img class="w-[8em] h-[8em] sm:w-[18em] sm:h-[18em] rounded-full"
+                                <img class="w-[8em] h-[8em] sm:w-[18em] sm:h-[18em] rounded-full border-[2px] border-zinc-300 dark:border-zinc-700"
                                     :src="expandUrl(profile!.avatar)"></img>
                                 <div class="flex flex-col items-start justify-center">
                                     <h3 class="text-2xl font-bold">{{ profile.nickname }}</h3>
@@ -128,50 +127,62 @@ onMounted(async () => {
                             </div>
                         </div>
                         <div class="flex-1 h-full w-full">
-                            <div v-if="tab === 'overview' && !loading"
-                                class="flex flex-col gap-4 justify-center items-center py-8 border dark:border-zinc-600 rounded-md">
-                                <Knob :size="300" v-model="profile!.rating" readonly />
-                                <span class="text-3xl text-gray-500">Rating</span>
-                            </div>
-                            <DataView v-if="tab === 'problems'" :value="problemList" dataKey="id" class="rounded">
-                                <template #header>
-                                    <div class="inline-flex flex-wrap justify-between items-center gap-4 w-full">
-                                        <InputText placeholder="Find a problem..." size="small" disabled></InputText>
-                                        <Button @click="router.push('/problem/create')" label="New" size="small" icon="pi pi-book"></Button>
-                                    </div>
-                                </template>
-                                <template #empty>
-                                    <div class="w-full h-full py-10 gap-4 flex flex-col items-center justify-center">
-                                        <img class="w-[16em] h-[16em]" :src="themeStore.logo"></img>
-                                        <span class="text-xl text-gray-500">No Problems yet, <a
-                                                class="underline cursor-pointer"
-                                                @click="router.push('/problem/create')">Create one?</a></span>
-                                    </div>
-                                </template>
-                                <template v-if="loadingProblems" #list>
-                                    <div v-for="i in 3" :key="i">
-                                        <div class="flex flex-col xl:flex-row xl:items-start p-6 gap-6"
-                                            :class="{ 'border-t border-zinc-200 dark:border-zinc-700': i !== 0 }">
-                                            <Skeleton class="!w-9/12 sm:!w-64 xl:!w-40 !h-24 mx-auto" />
+                            <Panel v-if="tab === 'overview' && !loading" header="Profile"
+                                class="border dark:border-zinc-600">
+                                <div class="py-8 flex flex-col gap-4 justify-center items-center">
+                                    <Knob :size="300" v-model="profile!.rating" readonly />
+                                    <span class="text-3xl text-gray-500">Rating</span>
+                                </div>
+                            </Panel>
+
+                            <Panel v-if="tab === 'problems'" pt:header:class="!hidden" pt:content:class="!p-[1.125rem]">
+                                <DataView :value="problemList" dataKey="id">
+                                    <template #header>
+                                        <div class="inline-flex flex-wrap justify-between items-center gap-4 w-full">
+                                            <InputText placeholder="Find a problem..." size="small" disabled>
+                                            </InputText>
+                                            <Button @click="router.push('/problem/create')" label="New" size="small"
+                                                icon="pi pi-book"></Button>
                                         </div>
-                                    </div>
-                                </template>
-                                <template v-else #list="slotProps">
-                                    <div v-for="problem in slotProps.items">
+                                    </template>
+                                    <template #empty>
                                         <div
-                                            class="flex flex-col items-start p-6 gap-3 border-t border-zinc-200 dark:border-zinc-700">
-                                            <!-- Should add problem sequence later -->
-                                            <div class="flex items-center gap-4">
-                                                <h2 @click="router.push('/problem/' + problem.id)"
-                                                    class="font-bold text-blue-500 dark:text-blue-400 hover:underline cursor-pointer">
-                                                    {{ problem.title }}</h2>
-                                                <Badge severity="secondary">{{ problem.private ? 'Private' : 'Public' }}</Badge>
-                                            </div>
-                                            <span class="text-sm">{{ timeAgo(problem.updated_at) }}</span>
+                                            class="w-full h-full py-10 gap-4 flex flex-col items-center justify-center">
+                                            <img class="w-[16em] h-[16em]" :src="themeStore.logo"></img>
+                                            <span class="text-xl text-gray-500">No Problems yet, <a
+                                                    class="underline cursor-pointer"
+                                                    @click="router.push('/problem/create')">Create one?</a></span>
                                         </div>
-                                    </div>
-                                </template>
-                            </DataView>
+                                    </template>
+                                    <template v-if="loadingProblems" #list>
+                                        <div v-for="i in 3" :key="i">
+                                            <div class="flex flex-col items-start p-6 gap-3"
+                                                :class="{ 'border-t border-zinc-200 dark:border-zinc-700': i !== 0 }">
+                                                <Skeleton height="2em" width="10em"></Skeleton>
+                                                <Skeleton></Skeleton>
+                                                <Skeleton width="3em"></Skeleton>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <template v-else #list="slotProps">
+                                        <div v-for="(problem, index) in slotProps.items">
+                                            <div class="flex flex-col items-start p-6 gap-3"
+                                                :class="{ 'border-t border-zinc-200 dark:border-zinc-700': index !== 0 }">
+                                                <!-- Should add problem sequence later -->
+                                                <div class="flex items-center gap-4">
+                                                    <h2 @click="router.push('/problem/' + problem.id)"
+                                                        class="font-bold text-blue-500 dark:text-blue-400 hover:underline cursor-pointer">
+                                                        {{ problem.title }}</h2>
+                                                    <Badge severity="secondary">{{ problem.private ? 'Private' :
+                                                        'Public' }}
+                                                    </Badge>
+                                                </div>
+                                                <span class="text-sm">{{ timeAgo(problem.updated_at) }}</span>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </DataView>
+                            </Panel>
                         </div>
                     </div>
                 </TabPanel>

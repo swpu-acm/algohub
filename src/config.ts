@@ -1,3 +1,3 @@
 export const config = {
-  base: "http://localhost:8000/",
+  base: "https://api.swpu-acm.org/",
 };

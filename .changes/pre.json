@@ -1,5 +1,5 @@
 {
-  "tag": "nightly",
+  "tag": "alpha",
   "changes": [
     ".changes/add-icon.md",
     ".changes/breadcrumb-bg.md",
@@ -20,9 +20,12 @@
     ".changes/index-page.md",
     ".changes/list-problem.md",
     ".changes/login.md",
+    ".changes/n-progress.md",
     ".changes/optimize-dark.md",
     ".changes/optimize-monaco.md",
+    ".changes/optimize-ui.md",
     ".changes/problem-page.md",
+    ".changes/problem-panel.md",
     ".changes/refactor-login.md",
     ".changes/release-nightly.md",
     ".changes/release-url.md",

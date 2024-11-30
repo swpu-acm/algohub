@@ -1,5 +1,11 @@
 import { execSync } from "child_process";
-import { createReadStream, existsSync, unlinkSync, writeFileSync } from "fs";
+import {
+  createReadStream,
+  existsSync,
+  readFileSync,
+  unlinkSync,
+  writeFileSync,
+} from "fs";
 import { defineCommand, run } from "archons";
 import { createHash } from "crypto";
 import axios from "axios";
@@ -21,6 +27,15 @@ source_x86_64=("<source_x86>")
 sha256sums_x86_64=('<sha256sums>')
 package() {
   tar -xz -f data.tar.gz -C "\${pkgdir}"
+  echo "[Desktop Entry]
+Categories=Network;
+Comment=ACM Algorithm Hub
+Exec=WEBKIT_DISABLE_COMPOSITING_MODE=1 algohub
+Icon=algohub
+Name=algohub
+Terminal=false
+Type=Application
+" > "\${pkgdir}/usr/share/applications/algohub.desktop"
 }
 `;
 
@@ -74,6 +89,18 @@ const releaseAur = defineCommand({
     // Write new SSH key file
     writeFileSync(aurSSHKeyPath, AUR_SSH_KEY + "\n");
     execSync(`chmod 400 ${aurSSHKeyPath}`);
+
+    // Add aur to known hosts
+    if (existsSync(`${process.env.HOME}/.ssh/known_hosts`)) {
+      const knownHosts = readFileSync(`${process.env.HOME}/.ssh/known_hosts`, {
+        encoding: "utf-8",
+      });
+      if (!knownHosts.includes("aur.archlinux.org")) {
+        execSync(`ssh-keyscan -H aur.archlinux.org >> ~/.ssh/known_hosts`);
+      }
+    } else {
+      execSync(`ssh-keyscan -H aur.archlinux.org >> ~/.ssh/known_hosts`);
+    }
 
     // Clone AUR repository if not exists
     if (!existsSync("aur")) {

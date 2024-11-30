@@ -4,14 +4,21 @@ import { useToast } from 'primevue';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-const props = defineProps<{
-    path?: {
-        icon: string,
-        label: string,
-        link: string,
-        command: () => void
-    }[]
-}>()
+const { path, separateBottom } = defineProps({
+    path: {
+        type: Object as () => {
+            icon: string,
+            label: string,
+            link: string,
+            command: () => void
+        }[],
+        default: []
+    },
+    separateBottom: {
+        type: Boolean,
+        default: undefined
+    }
+})
 
 const router = useRouter();
 const toast = useToast();
@@ -73,6 +80,13 @@ const createMenuItems = ref([
 const toggleCreateMenu = (event: any) => {
     menu.value.toggle(event);
 };
+
+const toString = (value: any) => {
+    if (typeof value === 'function') {
+        return value.toString();
+    }
+    return value;
+}
 </script>
 
 <template>
@@ -108,20 +122,22 @@ const toggleCreateMenu = (event: any) => {
             </footer>
         </template>
     </Drawer>
-    <div class="bg-gray-100 dark:bg-zinc-900 flex flex-row items-center 
-    justify-between w-full py-1 px-3 flex-wrap border-zinc-300 shadow-sm">
+    <div class="bg-gray-100 dark:bg-zinc-900 flex flex-row items-center justify-between w-full py-3 px-5 flex-wrap"
+        :class="{ 'border-b-[1.2px] border-zinc-300 dark:border-zinc-600 shadow-sm': separateBottom ?? true }">
         <div class="inline-flex justify-center items-center">
             <img :src="themeStore.dark ? '/acm-light.png' : '/acm.png'" width="40"></img>
-            <Breadcrumb v-if="props.path?.length" :model="props.path" class="!bg-transparent">
+            <Breadcrumb v-if="path?.length" :model="path" class="!bg-transparent !p-0">
                 <template #item="{ item }">
-                    <a :class="item.link ? 'cursor-pointer' : ''" :href="item.link">
-                        <span :class="item.icon"></span>
-                        <span>{{ item.label }}</span>
+                    <Button v-if="item.link" v-ripple @click="router.push(item.link)" :icon="item.icon" :label="toString(item.label)" size="small" plain
+                        text></Button>
+                    <a v-else :href="item.link" class="px-2">
+                        <span v-if="item.icon" class="item.icon"></span>
+                        <span class="text-sm">{{ item.label }}</span>
                     </a>
                 </template>
                 <template #separator> / </template>
             </Breadcrumb>
-            <Skeleton v-else width="100px" height="20px"></Skeleton>
+            <Skeleton v-else class="ml-2 my-1" width="100px" height="20px"></Skeleton>
         </div>
         <div class="inline-flex justify-center items-center gap-3">
             <Button v-ripple @click="toggleCreateMenu" aria-haspopup="true" aria-controls="overlay_menu" plain outlined>

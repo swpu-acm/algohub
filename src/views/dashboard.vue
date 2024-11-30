@@ -53,7 +53,7 @@ onMounted(async () => {
         <div class="flex flex-col md:flex-row h-full w-full">
             <aside class="w-full md:w-1/3 lg:w-1/4 flex">
                 <div
-                    class="w-full bg-zinc-50 dark:bg-zinc-800 md:sticky md:top-0 md:bottom-0 z-30 flex flex-col min-h-50vh max-h-screen">
+                    class="w-full bg-zinc-100 dark:bg-zinc-800 md:sticky md:top-0 md:bottom-0 z-30 flex flex-col md:border-r-[1.5px] dark:border-zinc-700">
                     <div class="flex flex-col top-0 px-4 overflow-auto">
                         <div v-if="!loadingProfile" class="inline-flex m-8 mb-3 gap-8 items-center">
                             <Avatar :image="accountStore.avatarUrl" shape="circle"></Avatar>

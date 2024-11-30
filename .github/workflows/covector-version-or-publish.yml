@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - alpha
 
 permissions:
   # required for npm provenance
@@ -127,9 +128,6 @@ jobs:
 
       - name: Install frontend dependencies
         run: pnpm install
-
-      - name: Build TailwindCSS
-        run: pnpx tailwindcss -i ./input.css -o ./src/assets/tailwind.css
 
       - name: Bump Tauri version
         run: pnpm version:bump tauri --version ${{ needs.version-or-publish.outputs.version }}

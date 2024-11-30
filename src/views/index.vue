@@ -1,7 +1,13 @@
 <script setup lang="ts">
+import { useAccountStore } from '@/scripts/store';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+const accountStore = useAccountStore();
+
+if (accountStore.isLoggedIn) {
+  router.push('/dashboard');
+}
 </script>
 
 <template>
@@ -45,7 +51,5 @@ const router = useRouter();
         </div>
       </div>
     </div>
-
-
   </section>
 </template>

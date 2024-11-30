@@ -20,7 +20,6 @@ const input = ref('');
 const output = ref('');
 const samples = reactive<{ input: string, output: string }[]>([{ input: '', output: '' }]);
 const hint = ref('');
-const mode = ref<'ICPC' | 'OI'>('ICPC');
 const isPrivate = ref(false);
 const testCases = reactive<{ input: string, output: string }[]>([]);
 
@@ -40,7 +39,6 @@ interface ProblemForm<T, N> {
     owner: RecordId,
     categories: string[];
     tags: string[];
-    mode: 'ICPC' | 'OI';
     private: boolean;
 }
 
@@ -74,11 +72,12 @@ const onCreateProblem = async () => {
         time_limit: timeLimit.value,
         memory_limit: memoryLimit.value,
         test_cases: testCases.map(tc => ({ input: tc.input, output: tc.output })),
-        // @ts-ignore
-        owner: "account:" + accountStore.account.id,
+        owner: {
+            tb: "account",
+            id: accountStore.account.id!
+        },
         categories: [],
         tags: [],
-        mode: mode.value,
         private: isPrivate.value
     }
     const valid = validate(problem);
@@ -272,13 +271,6 @@ const formatSize = (bytes: number) => {
                                 </InputGroupAddon>
                                 <InputNumber v-model="memoryLimit" placeholder="Time Limit" />
                                 <InputGroupAddon>MB</InputGroupAddon>
-                            </InputGroup>
-                            <InputGroup>
-                                <InputGroupAddon>
-                                    <i class="pi pi-pencil"></i>
-                                </InputGroupAddon>
-                                <Select v-model:modelValue="mode" placeholder="Contest Mode"
-                                    :options="['ICPC', 'OI']"></Select>
                             </InputGroup>
                             <InputGroup>
                                 <InputGroupAddon>

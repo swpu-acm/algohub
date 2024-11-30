@@ -107,7 +107,6 @@ interface ProblemForm {
   test_cases: { input: string; output: string }[];
   categories: string[];
   tags: string[];
-  mode: "ICPC" | "OI";
   private: boolean;
 }
 

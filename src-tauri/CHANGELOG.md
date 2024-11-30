@@ -1,5 +1,31 @@
 # Changelog
 
+## \[0.1.1-alpha.2]
+
+### New Features
+
+- [`3cf98fb`](https://github.com/swpu-acm/algohub.git/commit/3cf98fba714a2fe14c7109f897bcfbfe7525eef7) ([#67](https://github.com/swpu-acm/algohub.git/pull/67) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Add `NProgress` loading bar to the whole frontend.
+
+## \[0.1.1-alpha.1]
+
+### Bug Fixes
+
+- [`514f839`](https://github.com/swpu-acm/algohub.git/commit/514f839831155b1e90de8791fd3154b09b67b79e) ([#65](https://github.com/swpu-acm/algohub.git/pull/65) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Fix multiple panels displaying on the user profile page.
+
+## \[0.1.1-alpha.0]
+
+### Performance Improvements
+
+- [`c59cd4d`](https://github.com/swpu-acm/algohub.git/commit/c59cd4d2cafc5c89a3e7c97037560e41cb799e4a) ([#61](https://github.com/swpu-acm/algohub.git/pull/61) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Optimize UI for better performance
+
+  - Use `postcss` instead of use `tailwindcss` directly.
+  - Optimize color design in light mode.
+  - Add `loading` state for pages.
+  - Wrap problems list with PrimeVue `Panel` component.
+  - Fix bread crumps padding if no links.
+  - Remove `mode` and add `owner` when creating a problem.
+  - Prepare for `alpha` release.
+
 ## \[0.1.1-nightly.17]
 
 ### New Features

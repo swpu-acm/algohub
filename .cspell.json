@@ -3,6 +3,7 @@
         "agplv",
         "algohub",
         "amannn",
+        "archlinux",
         "cdylib",
         "clippy",
         "confirmationservice",
@@ -53,6 +54,7 @@
         "usetoast"
     ],
     "ignorePaths": [
-        "pnpm-lock.yaml"
+        "pnpm-lock.yaml",
+        "CHANGELOG.md"
     ]
 }

@@ -51,11 +51,7 @@ const onSubmitCode = async (code: string, language: string) => {
     toast.add({ severity: 'success', summary: 'Success', detail: 'Your code has been submitted successfully.' });
 }
 
-const path = ref<{ label?: string, link?: string }[]>([
-    { label: 'fu050409' },
-    { label: 'problem' },
-    { label: id },
-]);
+const path = ref<{ label?: string, link?: string }[]>([]);
 
 const loading = ref(true);
 onMounted(async () => {
@@ -68,7 +64,8 @@ onMounted(async () => {
     }
     problem.value = res.data;
     path.value = [
-        { label: problem.value?.owner.id }
+        { label: problem.value?.owner.id, link: `/account/${problem.value?.owner.id}` },
+        { label: problem.value?.title }
     ]
     loading.value = false;
 })
@@ -79,10 +76,16 @@ onMounted(async () => {
         <UniversalToolBar :path></UniversalToolBar>
         <Splitter :gutterSize="2" class="flex-1 overflow-hidden">
             <SplitterPanel>
-                <Panel v-if="!loading" :header="problem?.title" class="w-full h-full overflow-auto">
-                    <MdPreview class="!bg-transparent" :modelValue="formatProblem(problem!)" :theme="themeStore.dark ? 'dark' : 'light'"
-                        codeTheme="github" previewTheme="github">
+                <Panel class="w-full h-full overflow-auto">
+                    <MdPreview v-if="!loading" class="!bg-transparent" :modelValue="formatProblem(problem!)"
+                        :theme="themeStore.dark ? 'dark' : 'light'" codeTheme="github" previewTheme="github">
                     </MdPreview>
+                    <div v-else class="flex flex-col gap-4 m-3">
+                        <Skeleton height="2em" width="15vw"></Skeleton>
+                        <Skeleton height="5em" width="40vw"></Skeleton>
+                        <Skeleton height="2em" width="30vw"></Skeleton>
+                        <Skeleton height="10em" width="40vw"></Skeleton>
+                    </div>
                 </Panel>
             </SplitterPanel>
             <SplitterPanel>
