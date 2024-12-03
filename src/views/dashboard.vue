@@ -4,7 +4,7 @@ import { onMounted, ref } from 'vue';
 import * as api from '@/scripts/api';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue';
-import { ProblemDetail } from '@/scripts/types';
+import { UserProblem } from '@/scripts/types';
 
 const path = [{ label: 'Dashboard' }];
 
@@ -19,7 +19,7 @@ if (!accountStore.isLoggedIn) {
 
 const themeStore = useThemeStore();
 
-const problemList = ref<ProblemDetail[]>([]);
+const problemList = ref<UserProblem[]>([]);
 
 const loadingProfile = ref(true);
 const loadingProblems = ref(true);
@@ -27,6 +27,7 @@ onMounted(async () => {
     if (!accountStore.isLoggedIn) return;
     const profile = await api.fetchProfile(accountStore.account.id!);
     if (!profile.success) {
+        accountStore.logout();
         return toast.add({ severity: 'error', summary: 'Error', detail: profile.message, life: 3000 });
     }
     accountStore.mergeProfile(profile.data!);

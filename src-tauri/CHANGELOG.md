@@ -1,5 +1,45 @@
 # Changelog
 
+## \[0.1.1-alpha.8]
+
+### Refactors
+
+- [`0bf2284`](https://github.com/swpu-acm/algohub.git/commit/0bf22846250a05b3be7acdb1f39c9c60785c961d) ([#78](https://github.com/swpu-acm/algohub.git/pull/78) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Fully refactored the problem api to sync changes with the `algohub-server`, also:
+
+  - Fixed icon sizes in markdown editor.
+  - Extract supported languages from ts enum.
+  - Refactored problem editor.
+
+## \[0.1.1-alpha.7]
+
+### New Features
+
+- [`0117ae8`](https://github.com/swpu-acm/algohub.git/commit/0117ae82cd0ca86ab3ec4c7314ef35f1e4c6cae9) ([#76](https://github.com/swpu-acm/algohub.git/pull/76) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Optimize monaco editor error notification.
+
+## \[0.1.1-alpha.6]
+
+### Bug Fixes
+
+- [`ae84180`](https://github.com/swpu-acm/algohub.git/commit/ae8418060ec6f9b45974dd255e0bc5da2c333205) ([#53](https://github.com/swpu-acm/algohub.git/pull/53) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Fix git ssh key read and write permission issue when publishing to AUR.
+
+## \[0.1.1-alpha.5]
+
+### New Features
+
+- [`61747c3`](https://github.com/swpu-acm/algohub.git/commit/61747c3d426f6bd4805065f3519afc5db4a85e9b) ([#73](https://github.com/swpu-acm/algohub.git/pull/73) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Full rewrite asset logic, use latest api and support get assets by api.
+
+## \[0.1.1-alpha.4]
+
+### Bug Fixes
+
+- [`ae84180`](https://github.com/swpu-acm/algohub.git/commit/ae8418060ec6f9b45974dd255e0bc5da2c333205) ([#53](https://github.com/swpu-acm/algohub.git/pull/53) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Fix git ssh key read and write permission issue when publishing to AUR.
+
+## \[0.1.1-alpha.3]
+
+### Refactors
+
+- [`bbc298c`](https://github.com/swpu-acm/algohub.git/commit/bbc298c6d7ff67736b55241f8afbdd7aedd78612) ([#69](https://github.com/swpu-acm/algohub.git/pull/69) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Refactor and enable code submission in monaco editor.
+
 ## \[0.1.1-alpha.2]
 
 ### New Features

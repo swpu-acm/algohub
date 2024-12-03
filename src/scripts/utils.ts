@@ -30,3 +30,7 @@ export const withoutHeadSlash = (url: string) => {
 export const expandUrl = (url?: string) => {
   return config.base + withoutHeadSlash(url ?? "");
 };
+
+export const expandAssetUrl = (url: string) => {
+  return config.base + withoutHeadSlash(`asset/${url}`);
+};

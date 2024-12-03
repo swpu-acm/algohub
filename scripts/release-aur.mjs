@@ -2,6 +2,7 @@ import { execSync } from "child_process";
 import {
   createReadStream,
   existsSync,
+  mkdirSync,
   readFileSync,
   unlinkSync,
   writeFileSync,
@@ -23,7 +24,7 @@ license=('agplv3')
 depends=('cairo' 'desktop-file-utils' 'gdk-pixbuf2' 'glib2' 'gtk3' 'hicolor-icon-theme' 'libsoup' 'pango' 'webkit2gtk-4.1')
 options=('!strip' '!emptydirs')
 install=\${pkgname}.install
-source_x86_64=("<source_x86>")
+source_x86_64=("https://github.com/swpu-acm/algohub/releases/download/algohub-v\${pkgver//_/-}/algohub_\${pkgver//_/-}_amd64.deb")
 sha256sums_x86_64=('<sha256sums>')
 package() {
   tar -xz -f data.tar.gz -C "\${pkgdir}"
@@ -71,7 +72,14 @@ const releaseAur = defineCommand({
     },
   },
   callback: async (ctx) => {
+    execSync("mkdir -p release", { stdio: "inherit" });
+    process.chdir("release");
+
     const basePath = process.cwd();
+    const sshPath = path.resolve(basePath, ".ssh");
+    mkdirSync(sshPath, { recursive: true });
+
+    const env = { ...process.env, HOME: basePath };
 
     // Check if AUR_SSH_KEY environment variable is set
     const AUR_SSH_KEY = process.env.AUR_SSH_KEY;
@@ -81,7 +89,7 @@ const releaseAur = defineCommand({
     }
 
     // Remove old SSH key file if it exists
-    const aurSSHKeyPath = path.resolve(basePath, `.aur_ssh_key`);
+    const aurSSHKeyPath = path.resolve(sshPath, "aur");
     if (existsSync(aurSSHKeyPath)) {
       unlinkSync(aurSSHKeyPath);
     }
@@ -91,24 +99,35 @@ const releaseAur = defineCommand({
     execSync(`chmod 400 ${aurSSHKeyPath}`);
 
     // Add aur to known hosts
-    if (existsSync(`${process.env.HOME}/.ssh/known_hosts`)) {
-      const knownHosts = readFileSync(`${process.env.HOME}/.ssh/known_hosts`, {
+    const knownHostsPath = path.resolve(sshPath, "known_hosts");
+    if (existsSync(knownHostsPath)) {
+      const knownHosts = readFileSync(knownHostsPath, {
         encoding: "utf-8",
       });
       if (!knownHosts.includes("aur.archlinux.org")) {
-        execSync(`ssh-keyscan -H aur.archlinux.org >> ~/.ssh/known_hosts`);
+        execSync(
+          `ssh-keyscan -v -t "rsa,ecdsa,ed25519" aur.archlinux.org >> ~/.ssh/known_hosts`,
+          { stdio: "inherit", env }
+        );
       }
     } else {
-      execSync(`ssh-keyscan -H aur.archlinux.org >> ~/.ssh/known_hosts`);
+      execSync(
+        `ssh-keyscan -v -t "rsa,ecdsa,ed25519" aur.archlinux.org > ~/.ssh/known_hosts`,
+        { stdio: "inherit", env }
+      );
     }
 
     // Clone AUR repository if not exists
     if (!existsSync("aur")) {
       execSync(
-        `git -c init.defaultBranch=master -c core.sshCommand="ssh -i ${aurSSHKeyPath}" clone ssh://aur@aur.archlinux.org/algohub.git aur`
+        `git -c init.defaultBranch=master -c core.sshCommand="ssh -i ${aurSSHKeyPath}" clone ssh://aur@aur.archlinux.org/algohub.git aur`,
+        { stdio: "inherit", env }
       );
     }
-    execSync(`git -C aur config core.sshCommand "ssh -i ${aurSSHKeyPath}"`);
+    execSync(`git -C aur config core.sshCommand "ssh -i ${aurSSHKeyPath}"`, {
+      stdio: "inherit",
+      env,
+    });
 
     const { version } = ctx.args;
 
@@ -130,9 +149,10 @@ const releaseAur = defineCommand({
     const sha256sums = await generateSHA256(binaryPath);
     console.log(`SHA256 checksums: ${sha256sums}`);
 
-    const PKGBUILD = PKGBUILD_TEMPLATE.replaceAll("<source_x86>", url)
-      .replaceAll("<pkgver>", version.replaceAll("-", "_"))
-      .replaceAll("<sha256sums>", sha256sums);
+    const PKGBUILD = PKGBUILD_TEMPLATE.replaceAll(
+      "<pkgver>",
+      version.replaceAll("-", "_")
+    ).replaceAll("<sha256sums>", sha256sums);
     writeFileSync(path.resolve(basePath, "aur/PKGBUILD"), PKGBUILD);
 
     execSync("makepkg --printsrcinfo > .SRCINFO", {
@@ -144,22 +164,32 @@ const releaseAur = defineCommand({
     unlinkSync(binaryPath);
 
     // Setup Git repository
-    execSync("git -C aur add PKGBUILD .SRCINFO algohub.install", {
+    execSync("git add .", {
       stdio: "inherit",
+      cwd: "aur",
+      env,
     });
-    execSync(`git -C aur config user.name "苏向夜"`);
-    execSync(`git -C aur config user.email "fu050409@163.com"`);
+    execSync(`git -C aur config user.name "苏向夜"`, { stdio: "inherit", env });
+    execSync(`git -C aur config user.email "fu050409@163.com"`, {
+      stdio: "inherit",
+      env,
+    });
 
     // Test AUR package
     execSync("makepkg -f", {
       stdio: "inherit",
       cwd: "aur",
+      env,
     });
 
     // Publish to AUR
-    execSync(`git -C aur commit -m "release: v${version}"`);
+    execSync(`git -C aur commit -m "release: v${version}"`, {
+      stdio: "inherit",
+      env,
+    });
     execSync(`git -C aur push origin master`, {
       stdio: "inherit",
+      env,
     });
   },
 });
