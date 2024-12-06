@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.1.1-beta.1]
+
+### Bug Fixes
+
+- [`a8ceba7`](https://github.com/swpu-acm/algohub.git/commit/a8ceba7f1e3c20e25e08556bc8f2d4501d06fb86) ([#97](https://github.com/swpu-acm/algohub.git/pull/97) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Fixed accuracy calculation in the contest.
+
 ## \[0.1.1-beta.0]
 
 ### New Features
