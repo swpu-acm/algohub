@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { useAccountStore, useThemeStore } from '@/scripts/store';
+import { useAccountStore } from '@/scripts/store';
 import { onMounted, ref } from 'vue';
 import * as api from '@/scripts/api';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue';
-import { ProblemDetail } from '@/scripts/types';
+import type { Contest, UserProblem } from '@/scripts/types';
 
 const path = [{ label: 'Dashboard' }];
 
@@ -17,16 +17,17 @@ if (!accountStore.isLoggedIn) {
     router.push("/login");
 }
 
-const themeStore = useThemeStore();
-
-const problemList = ref<ProblemDetail[]>([]);
+const problemList = ref<UserProblem[]>([]);
+const contests = ref<Contest[]>([]);
 
 const loadingProfile = ref(true);
 const loadingProblems = ref(true);
+const loadingContests = ref(true);
 onMounted(async () => {
     if (!accountStore.isLoggedIn) return;
     const profile = await api.fetchProfile(accountStore.account.id!);
     if (!profile.success) {
+        accountStore.logout();
         return toast.add({ severity: 'error', summary: 'Error', detail: profile.message, life: 3000 });
     }
     accountStore.mergeProfile(profile.data!);
@@ -44,6 +45,12 @@ onMounted(async () => {
     }
     problemList.value = problems.data!;
     loadingProblems.value = false;
+    const contestsRes = await api.listAllContests(accountStore.auth!);
+    if (!contestsRes.success) {
+        return toast.add({ severity: 'error', summary: 'Error', detail: contestsRes.message, life: 3000 });
+    }
+    contests.value = contestsRes.data!;
+    loadingContests.value = false;
 })
 </script>
 
@@ -53,7 +60,7 @@ onMounted(async () => {
         <div class="flex flex-col md:flex-row h-full w-full">
             <aside class="w-full md:w-1/3 lg:w-1/4 flex">
                 <div
-                    class="w-full bg-zinc-50 dark:bg-zinc-800 md:sticky md:top-0 md:bottom-0 z-30 flex flex-col min-h-50vh max-h-screen">
+                    class="w-full bg-zinc-100 dark:bg-zinc-800 md:sticky md:top-0 md:bottom-0 z-30 flex flex-col md:border-r-[1.5px] dark:border-zinc-700">
                     <div class="flex flex-col top-0 px-4 overflow-auto">
                         <div v-if="!loadingProfile" class="inline-flex m-8 mb-3 gap-8 items-center">
                             <Avatar :image="accountStore.avatarUrl" shape="circle"></Avatar>
@@ -103,9 +110,37 @@ onMounted(async () => {
                 </div>
             </aside>
             <div class="w-full h-full flex-1">
-                <div class="flex flex-col items-center mb-4">
-                    <Image :src="themeStore.logo"></Image>
-                    <span>Coming soon...</span>
+                <div class="w-full h-full overflow-auto">
+                    <div v-if="!loadingContests" class="flex flex-col items-center m-8 gap-8">
+                        <Card @click="router.push('/contest/' + contest.id)" v-if="contests.length > 0"
+                            v-for="contest in contests" class="w-full cursor-pointer shadow transition hover:shadow-lg">
+                            <template #title>
+                                <div class="flex flex-row items-center justify-between">
+                                    <span class="text-lg font-bold text-blue-500">
+                                        {{ contest.name }}
+                                    </span>
+                                    <Badge size="small" severity="success">{{ contest.mode }}</Badge>
+                                </div>
+                            </template>
+                            <template #subtitle>
+                                <span class="text-xs lg:text-sm">西南石油大学 ACM 学会</span>
+                            </template>
+                            <template #content>
+                                <p class="m-0 text-sm text-gray-500"> {{ contest.description }}</p>
+                            </template>
+                            <template #footer>
+                                <div class="flex flex-row items-center justify-between">
+                                    <span class="text-xs">From {{ contest.start_time }} to {{ contest.end_time }}</span>
+                                </div>
+                            </template>
+                        </Card>
+                        <div v-else class="w-full my-5 flex flex-col items-center text-gray-500 text-sm text-center">
+                            <span>No contests found.</span>
+                        </div>
+                    </div>
+                    <div v-else class="w-full h-full flex items-center justify-center">
+                        <ProgressSpinner></ProgressSpinner>
+                    </div>
                 </div>
             </div>
         </div>

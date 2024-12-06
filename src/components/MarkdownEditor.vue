@@ -36,3 +36,10 @@ const themeStore = useThemeStore();
             'previewOnly',
         ]"></MdEditor>
 </template>
+
+<style scoped>
+:deep(svg.md-editor-icon) {
+    width: revert-layer;
+    height: revert-layer;
+}
+</style>

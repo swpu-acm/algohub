@@ -2,7 +2,7 @@
 import { reactive, type Ref, ref } from "vue";
 import { useToast } from 'primevue/usetoast';
 import { useRouter } from "vue-router";
-import { useAccountStore, useThemeStore } from "../scripts/store";
+import { useAccountStore } from "../scripts/store";
 import VuePictureCropper, { cropper } from 'vue-picture-cropper'
 import * as api from "@/scripts/api";
 import { type FileUploadSelectEvent, useConfirm } from "primevue";
@@ -10,7 +10,6 @@ import { type FileUploadSelectEvent, useConfirm } from "primevue";
 const toast = useToast();
 const confirm = useConfirm();
 const router = useRouter();
-const themeStore = useThemeStore();
 const accountStore = useAccountStore();
 
 const activeStep = ref("1");
@@ -68,7 +67,7 @@ const onRegister = async ({ valid, states }: { valid: boolean, states: RegisterF
   })
   if (!res.success) {
     inProgress.value = false;
-    return toast.add({ severity: "error", summary: "Registration failed", detail: res.message, life: 3000 });
+    return toast.add({ severity: "error", summary: "Registration failed", detail: res.message });
   }
   accountStore.account = {
     username: states.username!.value,
@@ -87,7 +86,9 @@ const onRegister = async ({ valid, states }: { valid: boolean, states: RegisterF
     toast.add({ severity: "error", summary: "Registration failed", detail: res.message, life: 3000 });
 }
 
+const uploading = ref(false);
 const selectAvatar = async (event: FileUploadSelectEvent) => {
+  uploading.value = true
   inProgress.value = true
   avatarString.value = ''
 
@@ -122,23 +123,25 @@ const selectAvatar = async (event: FileUploadSelectEvent) => {
         })
         if (cropped) {
           const res = await api.uploadContent({
-            id: accountStore.account!.id!,
-            token: accountStore.account!.token!,
+            auth: accountStore.auth!,
+            owner: `account:${accountStore.account!.id}`,
             file: cropped,
           })
           if (!res.success) {
             inProgress.value = false
             return toast.add({ severity: "error", summary: "Upload failed", detail: res.message });
           }
-          accountStore.account!.avatar = res.data!.uri;
-          toast.add({ severity: "success", summary: "Avatar uploaded", detail: "Your new avatar has been saved." });
+          accountStore.account!.avatar = res.data!.id;
+          toast.add({ severity: "success", summary: "Avatar uploaded", detail: "Your new avatar has been saved.", life: 3000 });
         } else {
           toast.add({ severity: "error", summary: "Crop failed", detail: "Failed to initialize cropper." });
         }
+        uploading.value = false
         inProgress.value = false
       },
       reject: () => {
         avatarString.value = ''
+        uploading.value = false
         inProgress.value = false
       }
     })
@@ -150,16 +153,16 @@ const sexOptions = [
   { name: 'Female', value: false },
 ]
 
-interface UpdateProfileForm<T, S> {
+interface UpdateProfileForm<T, S, D> {
   nickname?: T;
   signature?: T;
   sex?: S;
-  birthday?: T;
+  birthday?: D;
   avatar?: T;
 }
 
-const updateProfileResolver = ({ values }: { values: UpdateProfileForm<string, boolean> }) => {
-  const errors: UpdateProfileForm<{ message: string }[], { message: string }[]> = {};
+const updateProfileResolver = ({ values }: { values: UpdateProfileForm<string, boolean, Date> }) => {
+  const errors: UpdateProfileForm<{ message: string }[], { message: string }[], { message: string }[]> = {};
 
   if (values.nickname && values.nickname.length > 16) {
     errors.nickname = [{ message: "Nickname is too long (16 characters max)." }]
@@ -171,7 +174,7 @@ const updateProfileResolver = ({ values }: { values: UpdateProfileForm<string, b
 
 const onUpdateProfile = async ({ valid, states }: {
   valid: boolean,
-  states: UpdateProfileForm<Ref<string>, Ref<boolean>>
+  states: UpdateProfileForm<Ref<string>, Ref<boolean>, Ref<Date>>
 }) => {
   if (!valid) return;
 
@@ -180,24 +183,25 @@ const onUpdateProfile = async ({ valid, states }: {
     id: accountStore.account!.id!,
     token: accountStore.account!.token!,
     profile: {
-      nickname: states.nickname!.value,
-      signature: states.signature!.value,
-      sex: states.sex!.value,
-      // birthday: states.birthday!.value,
+      nickname: states.nickname?.value,
+      signature: states.signature?.value,
+      sex: states.sex?.value,
+      birthday: states.birthday?.value?.toISOString().replace('Z', ''),
       avatar: accountStore.account!.avatar,
     }
   })
   if (!res.success) {
-    toast.add({ severity: "error", summary: "Update failed", detail: res.message });
-  } else {
-    toast.add({ severity: "success", summary: "Profile updated", detail: "Your profile has been updated." });
-    accountStore.mergeProfile({
-      nickname: states.nickname!.value,
-      signature: states.signature!.value,
-      sex: states.sex!.value,
-      // birthday: states.birthday!.value,
-    })
+    inProgress.value = false;
+    return toast.add({ severity: "error", summary: "Update failed", detail: res.message });
   }
+  toast.add({ severity: "success", summary: "Profile updated", detail: "Your profile has been updated.", life: 3000 });
+  accountStore.mergeProfile({
+    nickname: states.nickname!.value,
+    signature: states.signature!.value,
+    sex: states.sex!.value,
+    birthday: states.birthday!.value.toISOString().replace('Z', ''),
+  })
+
   inProgress.value = false;
 
   activeStep.value = "3";
@@ -277,170 +281,169 @@ const onComplete = async ({ valid, states }: { valid: boolean, states: CompleteF
   inProgress.value = false;
   router.push('/')
 }
+
+const path = [
+  { label: 'Home', link: '/' },
+  { label: 'Sign Up' }
+]
 </script>
 
 <template>
-  <div class="flex flex-col justify-center items-center h-full">
-    <div class="flex flex-col container m-auto items-center justify-center h-full">
-      <div class="flex flex-row justify-between mb-4 w-full">
-        <Button @click="router.go(-1)" icon="pi pi-arrow-left" label="Back" plain outlined></Button>
-        <Button @click="themeStore.toggle" :icon="`pi pi-${themeStore.dark ? 'moon' : 'sun'}`" plain text></Button>
-      </div>
-      <Stepper v-model:value="activeStep" linear class="h-full basis-[40rem]">
-        <StepList>
-          <Step value="1">Signup</Step>
-          <Step value="2">Profile</Step>
-          <Step value="3">Complete</Step>
-        </StepList>
-        <StepPanels class="h-80%">
-          <StepPanel value="1" class="h-full">
-            <Card class="m-auto flex basis-[40rem] w-full h-full items-center justify-center flex-col">
-              <template #title>Sign Up</template>
-              <template #subtitle>Create a new account with AlgoHub</template>
-              <template #content>
-                <Form v-slot="$form" :initialValues=registerInitialValues :resolver=registerResolver
-                  @submit="onRegister" class="flex flex-col gap-4 justify-center items-center">
-                  <div class="flex flex-col gap-1 w-full">
-                    <InputText name="username" type="text" placeholder="Username" fluid />
-                    <Message v-if="$form.username?.invalid" severity="error" size="small" variant="simple">{{
-                      $form.username.error.message }}</Message>
+  <div class="w-full h-full flex flex-col">
+    <UniversalToolBar :path></UniversalToolBar>
+    <Stepper v-model:value="activeStep" linear class="my-auto mx-auto">
+      <StepList>
+        <Step value="1">Signup</Step>
+        <Step value="2">Profile</Step>
+        <Step value="3">Complete</Step>
+      </StepList>
+      <StepPanels>
+        <StepPanel value="1">
+          <Card class="flex w-full h-full items-center justify-center flex-col">
+            <template #title>Sign Up</template>
+            <template #subtitle>Create a new account with AlgoHub</template>
+            <template #content>
+              <Form v-slot="$form" :initialValues=registerInitialValues :resolver=registerResolver @submit="onRegister"
+                class="flex flex-col gap-4 justify-center items-center">
+                <div class="flex flex-col gap-1 w-full">
+                  <InputText name="username" type="text" placeholder="Username" fluid />
+                  <Message v-if="$form.username?.invalid" severity="error" size="small" variant="simple">{{
+                    $form.username.error.message }}</Message>
+                </div>
+                <div class="flex flex-col gap-1 w-full">
+                  <InputText name="email" type="text" placeholder="Email" fluid />
+                  <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple">{{
+                    $form.email.error.message }}</Message>
+                </div>
+                <div class="flex flex-col gap-1 w-full">
+                  <Password name="password" type="text" placeholder="Password" :feedback="false" toggleMask fluid />
+                  <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple">{{
+                    $form.password.error.message }}</Message>
+                </div>
+                <div class="flex flex-col gap-1 w-full">
+                  <Password name="retyped_password" type="text" placeholder="Retype Password" :feedback="false"
+                    toggleMask fluid />
+                  <Message v-if="$form.retyped_password?.invalid" severity="error" size="small" variant="simple">{{
+                    $form.retyped_password.error.message }}</Message>
+                </div>
+                <div class="flex flex-col gap-1 w-full">
+                  <div class="flex items-center gap-2">
+                    <Checkbox inputId="terms" name="terms" binary />
+                    <label for="terms" class="text-sm">I have read and agree to the <a href="#" class="underline">Affero
+                        General Public License v3</a>.</label>
                   </div>
-                  <div class="flex flex-col gap-1 w-full">
-                    <InputText name="email" type="text" placeholder="Email" fluid />
-                    <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple">{{
-                      $form.email.error.message }}</Message>
-                  </div>
-                  <div class="flex flex-col gap-1 w-full">
-                    <Password name="password" type="text" placeholder="Password" :feedback="false" toggleMask fluid />
-                    <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple">{{
-                      $form.password.error.message }}</Message>
-                  </div>
-                  <div class="flex flex-col gap-1 w-full">
-                    <Password name="retyped_password" type="text" placeholder="Retype Password" :feedback="false"
-                      toggleMask fluid />
-                    <Message v-if="$form.retyped_password?.invalid" severity="error" size="small" variant="simple">{{
-                      $form.retyped_password.error.message }}</Message>
-                  </div>
-                  <div class="flex flex-col gap-1 w-full">
-                    <div class="flex items-center gap-2">
-                      <Checkbox inputId="terms" name="terms" binary />
-                      <label for="terms" class="text-sm">I have read and agree to the <a href="#"
-                          class="underline">Affero
-                          General Public License v3</a>.</label>
-                    </div>
-                    <Message v-if="$form.terms?.invalid" severity="error" size="small" variant="simple">{{
-                      $form.terms.error.message }}</Message>
-                  </div>
-                  <p>Already have an account? <a @click="router.push('/login')" class="underline">Login</a></p>
-                  <Button type="submit" label="Register" class="w-full" :loading="inProgress" secondary></Button>
-                </Form>
-              </template>
-            </Card>
-          </StepPanel>
-          <StepPanel value="2" class="h-full">
-            <ConfirmDialog group="templating">
-              <template #message>
-                <VuePictureCropper :boxStyle="{
-                  width: '100%',
-                  height: '100%',
-                  margin: 'auto',
-                }" :img="avatarString" :options="{
-                  viewMode: 1,
-                  dragMode: 'crop',
-                  aspectRatio: 1,
-                }" :presetMode="{
-                  width: 500,
-                  height: 500,
-                }" />
-              </template>
-            </ConfirmDialog>
+                  <Message v-if="$form.terms?.invalid" severity="error" size="small" variant="simple">{{
+                    $form.terms.error.message }}</Message>
+                </div>
+                <p>Already have an account? <a @click="router.push('/login')" class="underline">Login</a></p>
+                <Button type="submit" label="Register" class="w-full" :loading="inProgress" secondary></Button>
+              </Form>
+            </template>
+          </Card>
+        </StepPanel>
+        <StepPanel value="2" class="h-full">
+          <ConfirmDialog group="templating">
+            <template #message>
+              <VuePictureCropper :boxStyle="{
+                width: '100%',
+                height: '100%',
+                margin: 'auto',
+              }" :img="avatarString" :options="{
+                viewMode: 1,
+                dragMode: 'crop',
+                aspectRatio: 1,
+              }" :presetMode="{
+                width: 500,
+                height: 500,
+              }" />
+            </template>
+          </ConfirmDialog>
 
-            <Card class="m-auto flex basis-[40rem] w-full h-full items-center justify-center flex-col">
-              <template #title>Update profile</template>
-              <template #subtitle>Congratulates on your registration!</template>
-              <template #content>
-                <Form v-slot="$form" :resolver=updateProfileResolver @submit="onUpdateProfile"
-                  class="flex flex-col gap-4 justify-center items-center">
-                  <div class="flex flex-row gap-4 w-full justify-center items-center">
-                    <label for="avatar" class="text-sm">Upload Avatar</label>
-                    <input name="avatar" class="!hidden"></input>
-                    <div class="flex flex-col gap-2 w-full justify-center items-center">
-                      <FileUpload @select="selectAvatar" name="avatar" mode="basic"
-                        accept="image/jpg, image/jpeg, image/png, image/gif" customUpload auto
-                        chooseLabel="Select Avatar" :maxFileSize="1024 * 1024 * 2" :multiple="false"
-                        severity="secondary" :disabled="inProgress">
-                      </FileUpload>
-                      <Image v-if="croppedAvatar" :src="croppedAvatar" class="shadow-md rounded-xl w-full sm:w-32"
-                        preview></Image>
-                    </div>
+          <Card class="m-auto flex basis-[40rem] w-full h-full items-center justify-center flex-col">
+            <template #title>Update profile</template>
+            <template #subtitle>Congratulates on your registration!</template>
+            <template #content>
+              <Form v-slot="$form" :resolver=updateProfileResolver @submit="onUpdateProfile"
+                class="flex flex-col gap-4 justify-center items-center">
+                <div class="flex flex-row gap-4 w-full justify-center items-center">
+                  <label for="avatar" class="text-sm">Upload Avatar</label>
+                  <input name="avatar" class="!hidden"></input>
+                  <div class="flex flex-col gap-2 w-full justify-center items-center">
+                    <FileUpload v-show="!uploading" @select="selectAvatar" name="avatar" mode="basic"
+                      accept="image/jpg, image/jpeg, image/png, image/gif" customUpload auto chooseLabel="Select Avatar"
+                      :maxFileSize="1024 * 1024 * 2" :multiple="false" severity="secondary">
+                    </FileUpload>
+                    <Button v-show="uploading" label="Uploading..." loading></Button>
+                    <Image v-if="croppedAvatar" :src="croppedAvatar" class="shadow-md rounded-xl w-full sm:w-32" preview
+                      imageClass="rounded-full"></Image>
                   </div>
-                  <div class="flex flex-col gap-1 w-full">
-                    <InputText name="nickname" type="text" placeholder="Nickname" fluid />
-                    <Message v-if="$form.nickname?.invalid" severity="error" size="small" variant="simple">{{
-                      $form.nickname.error.message }}</Message>
-                  </div>
-                  <div class="flex flex-col gap-1 w-full">
-                    <InputText name="signature" type="text" placeholder="Personalized Signature" fluid />
-                    <Message v-if="$form.signature?.invalid" severity="error" size="small" variant="simple">{{
-                      $form.signature.error.message }}</Message>
-                  </div>
-                  <div class="flex flex-col gap-1 w-full">
-                    <Select name="sex" :options="sexOptions" optionLabel="name" placeholder="Biological Sex"
-                      :optionValue="v => v.value" class="w-full"></Select>
-                    <Message v-if="$form.sex?.invalid" severity="error" size="small" variant="simple">{{
-                      $form.sex.error.message }}</Message>
-                  </div>
-                  <div class="flex flex-col gap-1 w-full">
-                    <InputText name="birthday" type="text" placeholder="Birthday" fluid :disabled="true" />
-                    <Message v-if="$form.birthday?.invalid" severity="error" size="small" variant="simple">{{
-                      $form.birthday.error.message }}</Message>
-                  </div>
-                  <p>Can't wait to enjoy? <a @click="router.push('/')" class="underline">Skip</a></p>
-                  <Button type="submit" label="Save" class="w-full" :disabled="inProgress" secondary></Button>
-                </Form>
-              </template>
-            </Card>
-          </StepPanel>
-          <StepPanel value="3" class="h-full">
-            <Card class="m-auto flex basis-[40rem] w-full h-full items-center justify-center flex-col">
-              <template #title>Activate your account</template>
-              <template #subtitle>Complete your identification to activate your account</template>
-              <template #content>
-                <Form v-slot="$form" :initialValues=completeInitialValues :resolver=completeResolver
-                  @submit="onComplete" class="flex flex-col gap-4 justify-center items-center">
-                  <div class="flex flex-col gap-1 w-full">
-                    <InputText name="name" type="text" placeholder="Real Name" fluid />
-                    <Message v-if="$form.name?.invalid" severity="error" size="small" variant="simple">{{
-                      $form.name.error.message }}</Message>
-                  </div>
-                  <div class="flex flex-col gap-1 w-full">
-                    <InputText name="student_id" type="text" placeholder="Student ID" fluid />
-                    <Message v-if="$form.student_id?.invalid" severity="error" size="small" variant="simple">{{
-                      $form.student_id.error.message }}</Message>
-                  </div>
-                  <div class="flex flex-col gap-1 w-full">
-                    <InputText name="school" type="text" placeholder="School" fluid />
-                    <Message v-if="$form.school?.invalid" severity="error" size="small" variant="simple">{{
-                      $form.school.error.message }}</Message>
-                  </div>
-                  <div class="flex flex-col gap-1 w-full">
-                    <InputText name="college" type="text" placeholder="College" fluid />
-                    <Message v-if="$form.college?.invalid" severity="error" size="small" variant="simple">{{
-                      $form.college.error.message }}</Message>
-                  </div>
-                  <div class="flex flex-col gap-1 w-full">
-                    <InputText name="major" type="text" placeholder="Major" fluid />
-                    <Message v-if="$form.major?.invalid" severity="error" size="small" variant="simple">{{
-                      $form.major.error.message }}</Message>
-                  </div>
-                  <p>Activate your account later? <a @click="router.push('/')" class="underline">Stay inactive</a></p>
-                  <Button type="submit" label="Activate" class="w-full" :disabled="inProgress" secondary></Button>
-                </Form>
-              </template>
-            </Card>
-          </StepPanel>
-        </StepPanels>
-      </Stepper>
-    </div>
+                </div>
+                <div class="flex flex-col gap-1 w-full">
+                  <InputText name="nickname" type="text" placeholder="Nickname" fluid />
+                  <Message v-if="$form.nickname?.invalid" severity="error" size="small" variant="simple">{{
+                    $form.nickname.error.message }}</Message>
+                </div>
+                <div class="flex flex-col gap-1 w-full">
+                  <InputText name="signature" type="text" placeholder="Personalized Signature" fluid />
+                  <Message v-if="$form.signature?.invalid" severity="error" size="small" variant="simple">{{
+                    $form.signature.error.message }}</Message>
+                </div>
+                <div class="flex flex-col gap-1 w-full">
+                  <Select name="sex" :options="sexOptions" optionLabel="name" placeholder="Biological Sex"
+                    :optionValue="v => v.value" class="w-full"></Select>
+                  <Message v-if="$form.sex?.invalid" severity="error" size="small" variant="simple">{{
+                    $form.sex.error.message }}</Message>
+                </div>
+                <div class="flex flex-col gap-1 w-full">
+                  <DatePicker name="birthday" placeholder="Birthday" fluid />
+                  <Message v-if="$form.birthday?.invalid" severity="error" size="small" variant="simple">{{
+                    $form.birthday.error.message }}</Message>
+                </div>
+                <p>Can't wait to enjoy? <a @click="router.push('/')" class="underline">Skip</a></p>
+                <Button type="submit" label="Save" class="w-full" :loading="inProgress" secondary></Button>
+              </Form>
+            </template>
+          </Card>
+        </StepPanel>
+        <StepPanel value="3" class="h-full">
+          <Card class="m-auto flex basis-[40rem] w-full h-full items-center justify-center flex-col">
+            <template #title>Activate your account</template>
+            <template #subtitle>Complete your identification to activate your account</template>
+            <template #content>
+              <Form v-slot="$form" :initialValues=completeInitialValues :resolver=completeResolver @submit="onComplete"
+                class="flex flex-col gap-4 justify-center items-center">
+                <div class="flex flex-col gap-1 w-full">
+                  <InputText name="name" type="text" placeholder="Real Name" fluid />
+                  <Message v-if="$form.name?.invalid" severity="error" size="small" variant="simple">{{
+                    $form.name.error.message }}</Message>
+                </div>
+                <div class="flex flex-col gap-1 w-full">
+                  <InputText name="student_id" type="text" placeholder="Student ID" fluid />
+                  <Message v-if="$form.student_id?.invalid" severity="error" size="small" variant="simple">{{
+                    $form.student_id.error.message }}</Message>
+                </div>
+                <div class="flex flex-col gap-1 w-full">
+                  <InputText name="school" type="text" placeholder="School" fluid />
+                  <Message v-if="$form.school?.invalid" severity="error" size="small" variant="simple">{{
+                    $form.school.error.message }}</Message>
+                </div>
+                <div class="flex flex-col gap-1 w-full">
+                  <InputText name="college" type="text" placeholder="College" fluid />
+                  <Message v-if="$form.college?.invalid" severity="error" size="small" variant="simple">{{
+                    $form.college.error.message }}</Message>
+                </div>
+                <div class="flex flex-col gap-1 w-full">
+                  <InputText name="major" type="text" placeholder="Major" fluid />
+                  <Message v-if="$form.major?.invalid" severity="error" size="small" variant="simple">{{
+                    $form.major.error.message }}</Message>
+                </div>
+                <p>Activate your account later? <a @click="router.push('/')" class="underline">Stay inactive</a></p>
+                <Button type="submit" label="Activate" class="w-full" :disabled="inProgress" secondary></Button>
+              </Form>
+            </template>
+          </Card>
+        </StepPanel>
+      </StepPanels>
+    </Stepper>
   </div>
 </template>

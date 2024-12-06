@@ -1,5 +1,124 @@
 # Changelog
 
+## \[0.1.1-beta.0]
+
+### New Features
+
+- [`7b6134b`](https://github.com/swpu-acm/algohub.git/commit/7b6134bb678fa29940c0ae87bdaf6f8016fa4bea) ([#62](https://github.com/swpu-acm/algohub.git/pull/62) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Support for contest page.
+
+### Bug Fixes
+
+- [`7b6134b`](https://github.com/swpu-acm/algohub.git/commit/7b6134bb678fa29940c0ae87bdaf6f8016fa4bea) ([#62](https://github.com/swpu-acm/algohub.git/pull/62) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Fix upload max size limit.
+
+## \[0.1.1-alpha.14]
+
+### New Features
+
+- [`26e6284`](https://github.com/swpu-acm/algohub.git/commit/26e62843da2b34223ce35ae136bfce9370cfe77f) ([#93](https://github.com/swpu-acm/algohub.git/pull/93) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Fixed the issue of not being able to sign up without a birthday.
+
+  > All fields are now not required.
+
+## \[0.1.1-alpha.13]
+
+### New Features
+
+- [`763d56d`](https://github.com/swpu-acm/algohub.git/commit/763d56d30627c499837e449814e85ac1d55235dd) ([#90](https://github.com/swpu-acm/algohub.git/pull/90) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Support create new contest.
+
+## \[0.1.1-alpha.12]
+
+### New Features
+
+- [`00032d9`](https://github.com/swpu-acm/algohub.git/commit/00032d9588c4b33dd3299335f344ebe5274a2966) ([#87](https://github.com/swpu-acm/algohub.git/pull/87) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Support for Birthday datetime picker in the register page.
+- [`abe70bd`](https://github.com/swpu-acm/algohub.git/commit/abe70bd656bbacdd9eaa222cef36f39b0a32e9e8) ([#89](https://github.com/swpu-acm/algohub.git/pull/89) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Support auto load submissions in AlgoHub.
+
+## \[0.1.1-alpha.11]
+
+### Bug Fixes
+
+- [`afa61d5`](https://github.com/swpu-acm/algohub.git/commit/afa61d5ab6eefd5d334a54593598aaf7eadc06bb) ([#85](https://github.com/swpu-acm/algohub.git/pull/85) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Fix scroll height of rendered markdown in preview mode.
+
+## \[0.1.1-alpha.10]
+
+### New Features
+
+- [`a4de3d2`](https://github.com/swpu-acm/algohub.git/commit/a4de3d27fe799664d13aa19003fca5e42a76eb13) ([#84](https://github.com/swpu-acm/algohub.git/pull/84) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Optimize problem pages, including create and edit pages.
+
+### Refactors
+
+- [`7cdf917`](https://github.com/swpu-acm/algohub.git/commit/7cdf91747bcea34667ba8d92cdf37468685bcbf1) ([#82](https://github.com/swpu-acm/algohub.git/pull/82) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Refactored problem creation page.
+
+## \[0.1.1-alpha.9]
+
+### New Features
+
+- [`5413014`](https://github.com/swpu-acm/algohub.git/commit/5413014ff957cdee0b3561a0c45665d71e390749) ([#80](https://github.com/swpu-acm/algohub.git/pull/80) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Add splash screen before loading index page.
+
+## \[0.1.1-alpha.8]
+
+### Refactors
+
+- [`0bf2284`](https://github.com/swpu-acm/algohub.git/commit/0bf22846250a05b3be7acdb1f39c9c60785c961d) ([#78](https://github.com/swpu-acm/algohub.git/pull/78) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Fully refactored the problem api to sync changes with the `algohub-server`, also:
+
+  - Fixed icon sizes in markdown editor.
+  - Extract supported languages from ts enum.
+  - Refactored problem editor.
+
+## \[0.1.1-alpha.7]
+
+### New Features
+
+- [`0117ae8`](https://github.com/swpu-acm/algohub.git/commit/0117ae82cd0ca86ab3ec4c7314ef35f1e4c6cae9) ([#76](https://github.com/swpu-acm/algohub.git/pull/76) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Optimize monaco editor error notification.
+
+## \[0.1.1-alpha.6]
+
+### Bug Fixes
+
+- [`ae84180`](https://github.com/swpu-acm/algohub.git/commit/ae8418060ec6f9b45974dd255e0bc5da2c333205) ([#53](https://github.com/swpu-acm/algohub.git/pull/53) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Fix git ssh key read and write permission issue when publishing to AUR.
+
+## \[0.1.1-alpha.5]
+
+### New Features
+
+- [`61747c3`](https://github.com/swpu-acm/algohub.git/commit/61747c3d426f6bd4805065f3519afc5db4a85e9b) ([#73](https://github.com/swpu-acm/algohub.git/pull/73) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Full rewrite asset logic, use latest api and support get assets by api.
+
+## \[0.1.1-alpha.4]
+
+### Bug Fixes
+
+- [`ae84180`](https://github.com/swpu-acm/algohub.git/commit/ae8418060ec6f9b45974dd255e0bc5da2c333205) ([#53](https://github.com/swpu-acm/algohub.git/pull/53) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Fix git ssh key read and write permission issue when publishing to AUR.
+
+## \[0.1.1-alpha.3]
+
+### Refactors
+
+- [`bbc298c`](https://github.com/swpu-acm/algohub.git/commit/bbc298c6d7ff67736b55241f8afbdd7aedd78612) ([#69](https://github.com/swpu-acm/algohub.git/pull/69) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Refactor and enable code submission in monaco editor.
+
+## \[0.1.1-alpha.2]
+
+### New Features
+
+- [`3cf98fb`](https://github.com/swpu-acm/algohub.git/commit/3cf98fba714a2fe14c7109f897bcfbfe7525eef7) ([#67](https://github.com/swpu-acm/algohub.git/pull/67) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Add `NProgress` loading bar to the whole frontend.
+
+## \[0.1.1-alpha.1]
+
+### Bug Fixes
+
+- [`514f839`](https://github.com/swpu-acm/algohub.git/commit/514f839831155b1e90de8791fd3154b09b67b79e) ([#65](https://github.com/swpu-acm/algohub.git/pull/65) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Fix multiple panels displaying on the user profile page.
+
+## \[0.1.1-alpha.0]
+
+### Performance Improvements
+
+- [`c59cd4d`](https://github.com/swpu-acm/algohub.git/commit/c59cd4d2cafc5c89a3e7c97037560e41cb799e4a) ([#61](https://github.com/swpu-acm/algohub.git/pull/61) by [@fu050409](https://github.com/swpu-acm/algohub.git/../../fu050409)) Optimize UI for better performance
+
+  - Use `postcss` instead of use `tailwindcss` directly.
+  - Optimize color design in light mode.
+  - Add `loading` state for pages.
+  - Wrap problems list with PrimeVue `Panel` component.
+  - Fix bread crumps padding if no links.
+  - Remove `mode` and add `owner` when creating a problem.
+  - Prepare for `alpha` release.
+
 ## \[0.1.1-nightly.17]
 
 ### New Features

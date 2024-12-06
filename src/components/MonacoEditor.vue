@@ -11,9 +11,10 @@ import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
 import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
 import { useThemeStore } from '@/scripts/store';
 import type { SelectChangeEvent } from 'primevue';
+import { Language } from '@/scripts/types';
 
-const code = defineModel<string>('code', { required: true });
-const language = defineModel<string>('language', { default: 'rust' });
+const language = defineModel<Language>('language', { default: Language.Rust });
+const emit = defineEmits(['submit'])
 
 const themeStore = useThemeStore();
 
@@ -55,8 +56,8 @@ onMounted(async () => {
     }
     loader.config({ monaco })
     editor.value = await loader.init().then((monaco) => monaco.editor.create(editorContainer.value, {
-        value: code.value,
-        language: 'rust',
+        value: '',
+        language: language.value,
         theme: themeStore.dark ? 'vs-dark' : 'vs',
         fontFamily: 'Cascadia Code, Consolas, Menlo, Monaco, "Courier New", monospace',
         inlineSuggest: {
@@ -76,12 +77,7 @@ onUnmounted(disposeEditor)
 onBeforeUnmount(disposeEditor)
 onBeforeRouteLeave(disposeEditor)
 
-const languageOptions = [
-    { name: 'Rust', value: 'rust' },
-    { name: 'Python', value: 'python' },
-    { name: 'C', value: 'c' },
-    { name: 'C++', value: 'cpp' },
-]
+const languageOptions = Object.entries(Language).map(([name, value]) => ({ name, value }))
 
 const onChangeLanguage = (value: SelectChangeEvent) => {
     const editor = rawEditor.value;
@@ -90,15 +86,37 @@ const onChangeLanguage = (value: SelectChangeEvent) => {
         model && monaco.editor.setModelLanguage(model, value.value);
     }
 }
+
+type Severity = 'info' | "secondary" | 'warn' | 'error';
+
+const submitting = ref(false)
+const message = ref<{ text?: string, severity: Severity }>({ text: undefined, severity: 'info' })
+const onSubmit = () => {
+    if (!rawEditor.value) {
+        return
+    }
+    submitting.value = true
+    emit(
+        'submit',
+        rawEditor.value.getValue(),
+        language.value,
+        (text: string, severity: Severity) => {
+            submitting.value = false
+            message.value = { text, severity }
+        }
+    )
+}
 </script>
 
 <template>
     <div class="w-full h-full flex flex-col">
         <div class="flex flex-row m-[6px] justify-between">
             <Select v-model="language" @change="onChangeLanguage" :options="languageOptions" optionLabel="name"
-                optionValue="value" placeholder="Select a Language" />
-            <Button label="Submit" icon="pi pi-send" size="small" severity="contrast" outlined></Button>
+                optionValue="value" placeholder="Select a Language"></Select>
+            <Button @click="onSubmit" label="Submit" icon="pi pi-send" size="small" severity="contrast" outlined
+                :loading="submitting"></Button>
         </div>
+        <Message size="small" v-if="message.text" :severity="message.severity">{{ message.text }}</Message>
         <div class="flex-1" ref="editorContainer"></div>
     </div>
 </template>
