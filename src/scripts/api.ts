@@ -1,7 +1,19 @@
 import { AxiosError } from "axios";
 import axios from "@/scripts/axios";
 import { handleAxiosError } from "@/scripts/utils";
-import type { Credentials, ProblemDetail, Profile } from "./types";
+import type {
+  CreateAsset,
+  Credentials,
+  UserProblem,
+  Profile,
+  UserContent,
+  CreateProblem,
+  Submission,
+  Contest,
+  CreateContest,
+  ContestProblem,
+  ContestRank,
+} from "./types";
 
 export interface Response<D> {
   success: boolean;
@@ -30,25 +42,25 @@ export const register = async (form: Register) => {
   }
 };
 
-interface Upload {
-  id: string;
-  token: string;
-  file: File;
-}
-
-interface UploadResponse {
-  uri: string;
-  path: string;
-}
-
-export const uploadContent = async (form: Upload) => {
+export const uploadContent = async (form: CreateAsset) => {
   try {
-    const response = await axios.put("/account/content/upload", form, {
+    const response = await axios.put("/asset/upload", form, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     });
-    return response.data as Response<UploadResponse>;
+    return response.data as Response<UserContent>;
+  } catch (error) {
+    return handleAxiosError(AxiosError.from(error));
+  }
+};
+
+export const removeAsset = async (id: string, auth: Credentials) => {
+  try {
+    const response = await axios.delete(`/asset/delete/${id}`, {
+      data: auth,
+    });
+    return response.data as Response<undefined>;
   } catch (error) {
     return handleAxiosError(AxiosError.from(error));
   }
@@ -69,14 +81,23 @@ export const updateProfile = async (form: ProfileForm) => {
   }
 };
 
-interface LoginForm {
+interface Login {
   identity: string;
   password: string;
 }
 
-export const login = async (form: LoginForm) => {
+export const login = async (form: Login) => {
   try {
     const response = await axios.post("/account/login", form);
+    return response.data as Response<Credentials>;
+  } catch (error) {
+    return handleAxiosError(AxiosError.from(error));
+  }
+};
+
+export const verifyToken = async (auth?: Credentials) => {
+  try {
+    const response = await axios.post("/account/verify", auth);
     return response.data as Response<Credentials>;
   } catch (error) {
     return handleAxiosError(AxiosError.from(error));
@@ -92,30 +113,11 @@ export const fetchProfile = async (id: string) => {
   }
 };
 
-interface ProblemForm {
-  id: string;
-  token: string;
-
-  title: string;
-  description: string;
-  input?: string;
-  output?: string;
-  samples: { input: string; output: string }[];
-  hint?: string;
-  time_limit: number;
-  memory_limit: number;
-  test_cases: { input: string; output: string }[];
-  categories: string[];
-  tags: string[];
-  mode: "ICPC" | "OI";
-  private: boolean;
-}
-
 interface ProblemResponse {
   id: string;
 }
 
-export const createProblem = async (form: ProblemForm) => {
+export const createProblem = async (form: CreateProblem) => {
   try {
     const response = await axios.post("/problem/create", form);
     return response.data as Response<ProblemResponse>;
@@ -124,10 +126,19 @@ export const createProblem = async (form: ProblemForm) => {
   }
 };
 
+export const updateProblem = async (id: string, form: CreateProblem) => {
+  try {
+    const response = await axios.post(`/problem/update/${id}`, form);
+    return response.data as Response<undefined>;
+  } catch (error) {
+    return handleAxiosError(AxiosError.from(error));
+  }
+};
+
 export const fetchProblem = async (id: string, form?: Credentials) => {
   try {
     const response = await axios.post(`/problem/get/${id}`, form);
-    return response.data as Response<ProblemDetail>;
+    return response.data as Response<UserProblem>;
   } catch (error) {
     return handleAxiosError(AxiosError.from(error));
   }
@@ -142,24 +153,97 @@ interface ListProblem {
 export const listProblems = async (form: ListProblem) => {
   try {
     const response = await axios.post("/problem/list", form);
-    return response.data as Response<ProblemDetail[]>;
+    return response.data as Response<UserProblem[]>;
   } catch (error) {
     return handleAxiosError(AxiosError.from(error));
   }
 };
 
 interface SubmitCodeForm {
-  id: string;
-  token: string;
-  language: string;
+  auth: Credentials;
   code: string;
+  lang: string;
+}
+
+interface Id {
+  id: string;
 }
 
 export const submitCode = async (problem_id: string, form: SubmitCodeForm) => {
   try {
-    const response = await axios.post(`/problem/submit/${problem_id}`, form);
-    return response.data as Response<undefined>;
+    const response = await axios.post(`/code/submit/${problem_id}`, form);
+    return response.data as Response<Id>;
   } catch (error) {
     return handleAxiosError(AxiosError.from(error));
   }
 };
+
+export const fetchSubmission = async (id: string, form?: Credentials) => {
+  try {
+    const response = await axios.post(`/code/get/${id}`, form);
+    return response.data as Response<Submission>;
+  } catch (error) {
+    return handleAxiosError(AxiosError.from(error));
+  }
+};
+
+export const listSubmissionsByProblemForAccount = async (
+  id: string,
+  account_id: string,
+  auth: Credentials
+) => {
+  try {
+    const response = await axios.post(
+      `/code/list/${id}/account/${account_id}`,
+      auth
+    );
+    return response.data as Response<Submission[]>;
+  } catch (error) {
+    return handleAxiosError(AxiosError.from(error));
+  }
+};
+
+export const listAllContests = async (auth: Credentials) => {
+  try {
+    const response = await axios.post("/contest/list/all", auth);
+    return response.data as Response<Contest[]>;
+  } catch (error) {
+    return handleAxiosError(AxiosError.from(error));
+  }
+};
+
+export const createContest = async (data: CreateContest) => {
+  try {
+    const response = await axios.post("/contest/create", data);
+    return response.data as Response<Id>;
+  } catch (error) {
+    return handleAxiosError(AxiosError.from(error));
+  }
+};
+
+export const listProblemsByContest = async (id: string, auth: Credentials) => {
+  try {
+    const response = await axios.post(`/contest/list/${id}/problems`, auth);
+    return response.data as Response<ContestProblem[]>;
+  } catch (error) {
+    return handleAxiosError(AxiosError.from(error));
+  }
+};
+
+export const fetchContest = async (id: string, auth: Credentials) => {
+  try {
+    const response = await axios.post(`/contest/get/${id}`, auth);
+    return response.data as Response<Contest>;
+  } catch (error) {
+    return handleAxiosError(AxiosError.from(error));
+  }
+};
+
+export const fetchRanks = async (id: string, auth: Credentials) => {
+  try {
+    const response = await axios.post(`/contest/rank/${id}`, auth);
+    return response.data as Response<ContestRank[]>;
+  } catch (error) {
+    return handleAxiosError(AxiosError.from(error));
+  }
+}

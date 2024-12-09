@@ -5,46 +5,46 @@ export function timeAgo(timestamp: string): string {
     const diffInSeconds = Math.floor(diffInMs / 1000);
 
     if (diffInSeconds < 60) {
-        return `Updated just now`;
+        return `just now`;
     }
 
     const diffInMinutes = Math.floor(diffInSeconds / 60);
     if (diffInMinutes < 60) {
-        return `Updated ${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
+        return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
     }
 
     const diffInHours = Math.floor(diffInMinutes / 60);
     if (diffInHours < 24) {
-        return `Updated ${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+        return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
     }
 
     const diffInDays = Math.floor(diffInHours / 24);
     if (diffInDays === 1) {
-        return `Updated yesterday`;
+        return `yesterday`;
     }
     if (diffInDays < 7) {
-        return `Updated ${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+        return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
     }
 
     const diffInWeeks = Math.floor(diffInDays / 7);
     if (diffInWeeks === 1) {
-        return `Updated last week`;
+        return `last week`;
     }
     if (diffInWeeks < 4) {
-        return `Updated ${diffInWeeks} week${diffInWeeks > 1 ? 's' : ''} ago`;
+        return `${diffInWeeks} week${diffInWeeks > 1 ? 's' : ''} ago`;
     }
 
     const diffInMonths = Math.floor(diffInDays / 30);
     if (diffInMonths === 1) {
-        return `Updated last month`;
+        return `last month`;
     }
     if (diffInMonths < 12) {
-        return `Updated ${diffInMonths} month${diffInMonths > 1 ? 's' : ''} ago`;
+        return `${diffInMonths} month${diffInMonths > 1 ? 's' : ''} ago`;
     }
 
     const diffInYears = Math.floor(diffInDays / 365);
     if (diffInYears === 1) {
-        return `Updated last year`;
+        return `last year`;
     }
-    return `Updated ${diffInYears} year${diffInYears > 1 ? 's' : ''} ago`;
+    return `${diffInYears} year${diffInYears > 1 ? 's' : ''} ago`;
 }

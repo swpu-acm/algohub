@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
-import { expandUrl } from "./utils";
-import { Credentials } from "./types";
+import { expandAssetUrl } from "./utils";
+import { Credentials, RecordId } from "./types";
 
 const prefersDarkMode = () => {
   return (
@@ -77,7 +77,7 @@ export const useAccountStore = defineStore(
     const account = ref<Account>({});
 
     const isLoggedIn = computed(() =>
-      Boolean(account.value !== null && account.value.token)
+      Boolean(account.value !== null && (account.value.token?.length ?? 0) > 0)
     );
 
     const auth = computed<Credentials | undefined>(() => {
@@ -88,7 +88,12 @@ export const useAccountStore = defineStore(
           }
         : undefined;
     });
-    const avatarUrl = computed(() => expandUrl(account?.value?.avatar));
+    const avatarUrl = computed<string | undefined>(
+      () => account.value?.avatar && expandAssetUrl(account.value?.avatar)
+    );
+    const recordId = computed<RecordId>(() => {
+      return { tb: "account", id: account.value?.id! };
+    });
 
     const mergeProfile = (profile: Partial<Account>) => {
       if (account.value) {
@@ -100,7 +105,15 @@ export const useAccountStore = defineStore(
       account.value = {};
     };
 
-    return { account, auth, avatarUrl, isLoggedIn, mergeProfile, logout };
+    return {
+      account,
+      auth,
+      avatarUrl,
+      recordId,
+      isLoggedIn,
+      mergeProfile,
+      logout,
+    };
   },
   {
     persist: true,
