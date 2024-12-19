@@ -247,3 +247,22 @@ export const fetchRanks = async (id: string, auth: Credentials) => {
     return handleAxiosError(AxiosError.from(error));
   }
 }
+
+interface OrganizationData {
+  name: string;
+  display_name: string;
+  description: string;
+}
+
+export const createOrganization = async (auth: Credentials, form: OrganizationData) => {
+  try {
+    const response = await axios.post("/org/create", {
+      id: auth.id,
+      token: auth.token,
+      org: form,
+    });
+    return response.data as Response<Credentials>;
+  } catch (error) {
+    return handleAxiosError(AxiosError.from(error));
+  }
+};
