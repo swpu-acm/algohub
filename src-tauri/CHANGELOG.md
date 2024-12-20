@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.1.1-rc.3]
+
+### New Features
+
+- [`7ab4f7a`](https://github.com/swpu-acm/algohub.git/commit/7ab4f7a6be82b07987dcbe7a9c8bd3949c70a164) ([#125](https://github.com/swpu-acm/algohub.git/pull/125) by [@luo0602141017](https://github.com/swpu-acm/algohub.git/../../luo0602141017)) Created a new org create page.
+
 ## \[0.1.1-rc.2]
 
 ### Bug Fixes

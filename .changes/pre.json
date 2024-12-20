@@ -37,6 +37,7 @@
     ".changes/optimize-monaco.md",
     ".changes/optimize-problem.md",
     ".changes/optimize-ui.md",
+    ".changes/org-create.md",
     ".changes/problem-page.md",
     ".changes/problem-panel.md",
     ".changes/refactor-asset.md",

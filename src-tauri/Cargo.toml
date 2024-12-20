@@ -1,6 +1,6 @@
 [package]
 name = "algohub"
-version = "0.1.1-rc.2"
+version = "0.1.1-rc.3"
 description = "ACM Algorithm Hub"
 repository = "https://github.com/swpu-acm/algohub"
 readme = "../README.md"
